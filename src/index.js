@@ -1,23 +1,21 @@
-import koa from "koa";
-import koaLogger from "koa-logger";
-import {koaBody} from "koa-body";
-import router from "./routes.js";
+import app from './app.js';
+import db from './models/index.js';
+import dotenv from 'dotenv';
 
-const app = new koa();
+dotenv.config();
 
-// Middleware proporcionados por Koa
-app.use(koaLogger());
-app.use(koaBody());
+const PORT = process.env.PORT || 3000;
 
-// koa-router
-app.use(router.routes()); // solo se ocupa recuperar las rutas de routes.js
-
-
-app.use((ctx, next) => {
-    ctx.body = "Hola mundo !";
-})
-
-let puerto = 3000;
-app.listen(puerto, () => {
-    console.log("Iniciando app en puerto " + String(puerto));
-});
+db.sequelize
+    .authenticate()
+    .then(() => {
+        console.log("Connection to the database has been established successfully.");
+        app.listen(PORT, (err) => {
+            if (err) {
+                return console.log('Failed', err);
+            }
+            console.log("Listening on port " + String(PORT));
+            return app;
+        });
+    })
+    .catch((err) => console.log("Unable to connect to the database: ", err));
