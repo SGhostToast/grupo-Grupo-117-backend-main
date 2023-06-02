@@ -16,18 +16,26 @@ router.post("users.create", "/signup", async(ctx) => {
 router.post("users.enter", "/login", async(ctx) => {
   try {
     let user;
-    if(ctx.request.body.user && ctx.request.body.password) {
-      user = await ctx.orm.User.findOne({where:{username:ctx.params.username, password:ctx.request.body.password}});
+    if(ctx.request.body.username && ctx.request.body.password) {
+      user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username, password:ctx.request.body.password}});
     }
     else if(ctx.request.body.mail && ctx.request.body.password) {
-      user = await ctx.orm.User.findOne({where:{mail:ctx.params.mail, password:ctx.request.body.password}});
+      user = await ctx.orm.User.findOne({where:{mail:ctx.request.body.mail, password:ctx.request.body.password}});
     }
     else {
-      throw Error('Se necesita entregar un "user" o "mail" con su "password" correspondiente.')
+      throw Error('Se necesita entregar un "username" o "mail" con su "password" correspondiente.')
     }
-    if (user) {
+    if (user && user.status == 'OFFLINE') {
+      user.status = 'ONLINE';
+      await user.save();
       ctx.body = {
         msg: 'Login exitoso.',
+        user: user
+      };
+    }
+    else if (user) {
+      ctx.body = {
+        msg: 'Este usuario ya se encuentra ingresado en otra parte.',
         user: user
       };
     }
@@ -39,7 +47,7 @@ router.post("users.enter", "/login", async(ctx) => {
     }
     ctx.status = 200;
   } catch(error) {
-    ctx.body = error;
+    ctx.body = { errorMessage: error.message, errorCode: error.code };
     ctx.status = 400;
   }
 })

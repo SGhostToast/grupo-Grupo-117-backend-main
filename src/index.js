@@ -7,6 +7,33 @@ dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 
+
+let cleanup = false;
+
+// Handle Ctrl+C interruption signal
+const cleanupHandler = async () => {
+    if (cleanup) {
+        console.log('\nStill cleaning');
+        return;
+    }
+
+    cleanup = true;
+
+    try {
+        console.log('\nInterrupted, starting cleanup.');
+        await db.User.update({ status: 'OFFLINE' }, { where: {} });
+        console.log('Cleanup completed successfully');
+        process.exit();
+    } catch (err) {
+        console.error('\nError during cleanup:', err);
+        process.exit(1);
+    }
+};
+
+process.on('SIGINT', async () => {
+    await cleanupHandler();
+});
+
 db.sequelize
     .authenticate()
     .then(() => {
