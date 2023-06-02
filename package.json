@@ -2,7 +2,7 @@
   "name": "grupo-Grupo-117-backend",
   "version": "1.0.0",
   "main": "app.js",
-  "type": "module",
+  "type": "commonjs",
   "repository": "https://github.com/IIC2513/grupo-Grupo-117-backend.git",
   "author": "LilianBernot <lilian.bernot@gmail.com>",
   "license": "MIT",
