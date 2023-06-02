@@ -20,7 +20,11 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "model": "sequelize-cli seed:model --name",
+    "seed": "sequelize-cli seed:generate --name",
+    "plant": "sequelize-cli db:seed:all",
+    "migrate": "sequelize-cli db:migrate"
   },
   "devDependencies": {
     "eslint": "^8.41.0"
