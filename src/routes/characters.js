@@ -1,4 +1,4 @@
-import Router from "koa-router";
+const Router = require("koa-router");
 
 const router = new Router();
 
@@ -18,14 +18,10 @@ const characters = [
         description: "Bartholomew JoJo Simpson is a fictional character in the American animated television series The Simpsons and part of the Simpson family. He is voiced by Nancy Cartwright and first appeared on television in The Tracey Ullman Show short 'Good Night' on April 19, 1987.",
         image: "https://upload.wikimedia.org/wikipedia/en/a/aa/Bart_Simpson_200px.png"
     }
-]
+];
 
-// cuando un navigador hace un get a la pagina /show, se ejecuta esa funcion
-// personajes.show es un parametro no obligatorio, para dar un nombre a nuestra ruta
 router.get("personajes.show", "/show", async (ctx) => {
     ctx.body = characters;
-})
+});
 
-// module.exports = router;
-
-export default router;
+module.exports = router;

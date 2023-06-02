@@ -1,11 +1,9 @@
-import dotenv from 'dotenv';
+const dotenv = require("dotenv")
+const process = require('process');
 
-// para utilizar las variables de .env aqui
 dotenv.config();
 
-/* global process */
-
-const module_exports =  {
+module.exports = {
   "development": {
     "username": process.env.DB_USERNAME,
     "password": process.env.DB_PASSWORD,
@@ -28,30 +26,3 @@ const module_exports =  {
     "dialect": "postgres"
   }
 }
-
-// {
-//   "development": {
-//     "username": process.env.DB_USERNAME,
-//     "password": process.env.DB_PASSWORD,
-//     "database": String(process.env.DB_NAME) + "_development",
-//     "host": process.env.DB_HOST,
-//     "dialect": "postgres"
-//   },
-//   "test": {
-//     "username": process.env.DB_USERNAME,
-//     "password": process.env.DB_PASSWORD,
-//     "database": String(process.env.DB_NAME) + "_test",
-//     "host": process.env.DB_HOST,
-//     "dialect": "postgres"
-//   },
-//   "production": {
-//     "username": process.env.DB_USERNAME,
-//     "password": process.env.DB_PASSWORD,
-//     "database": String(process.env.DB_NAME) + "_production",
-//     "host": process.env.DB_HOST,
-//     "dialect": "postgres"
-//   }
-// }
-
-
-export default module_exports;

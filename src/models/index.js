@@ -1,32 +1,22 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-path-concat */
+
 'use strict';
 
-import fs from 'fs';
-import path from 'path';
-import Sequelize from 'sequelize';
-import process from 'process';
-
-import { fileURLToPath } from 'url';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+const fs = require('fs');
+const path = require('path');
+const Sequelize = require('sequelize');
+const process = require('process');
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
-// const config = require(__dirname + '/../config/config.js')[env];
-import config from '../config/config.js';
-const configData = config[env];
+const config = require(__dirname + '/../config/config.js')[env];
 const db = {};
 
 let sequelize;
-if (configData.use_env_variable) {
-  sequelize = new Sequelize(process.env[configData.use_env_variable], configData);
+if (config.use_env_variable) {
+  sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
-  sequelize = new Sequelize(configData.database, configData.username, configData.password, configData);
-}
-
-async function importModel(file) {
-  const module = await import(path.join(__dirname, file));
-  const model = module.default(sequelize, Sequelize.DataTypes);
-  return model;
+  sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
 
 fs
@@ -39,8 +29,8 @@ fs
       file.indexOf('.test.js') === -1
     );
   })
-  .forEach(async file => {
-    const model = await importModel(file);
+  .forEach(file => {
+    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
     db[model.name] = model;
   });
 
@@ -53,6 +43,4 @@ Object.keys(db).forEach(modelName => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-// module.exports = db;
-
-export default db;
+module.exports = db;

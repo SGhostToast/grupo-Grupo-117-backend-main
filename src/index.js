@@ -1,10 +1,9 @@
-import app from './app.js';
-import db from './models/index.js';
-import dotenv from 'dotenv';
+const process = require('process');
+const app = require('./app.js');
+const db = require('./models/index.js');
+const dotenv = require('dotenv');
 
 dotenv.config();
-
-/* global process */
 
 const PORT = process.env.PORT || 3000;
 
