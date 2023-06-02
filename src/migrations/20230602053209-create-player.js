@@ -10,7 +10,8 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: null
       },
       userid: {
         type: Sequelize.INTEGER,
@@ -28,6 +29,9 @@ module.exports = {
       insideid: {
         type: Sequelize.INTEGER,
         allowNull: false
+      },
+      status: {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,

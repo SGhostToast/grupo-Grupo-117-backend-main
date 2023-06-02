@@ -1,4 +1,7 @@
 'use strict';
+
+const User = require('./user');
+
 const {
   Model
 } = require('sequelize');
@@ -24,8 +27,22 @@ module.exports = (sequelize, DataTypes) => {
     userid: DataTypes.INTEGER,
     gameid: DataTypes.INTEGER,
     score: DataTypes.INTEGER,
-    insideid: DataTypes.INTEGER
+    insideid: DataTypes.INTEGER,
+    status: DataTypes.STRING
   }, {
+    // https://sequelize.org/docs/v6/other-topics/hooks/
+    hooks: {
+      afterCreate: (player) => {
+        if (player.name == null) {
+          return User.findByPk(player.userid)
+            .then(user => {
+              player.name = user.username;
+              return player.save();
+            });
+        }
+        return 1;
+      }
+    },
     sequelize,
     modelName: 'Player',
   });

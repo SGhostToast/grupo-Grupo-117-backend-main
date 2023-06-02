@@ -58,7 +58,8 @@ module.exports = (sequelize, DataTypes) => {
     played_matches: DataTypes.INTEGER,
     won_matches: DataTypes.INTEGER,
     max_score: DataTypes.INTEGER,
-    total_score: DataTypes.INTEGER
+    total_score: DataTypes.INTEGER,
+    status: DataTypes.ENUM('OFFLINE', 'ONLINE', 'PLAYING')
   }, {
     sequelize,
     modelName: 'User',

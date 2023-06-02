@@ -40,6 +40,11 @@ module.exports = {
         type: Sequelize.INTEGER,
         defaultValue: 0
       },
+      status: {
+        type: Sequelize.ENUM('OFFLINE', 'ONLINE', 'PLAYING'),
+        allowNull: false,
+        defaultValue: 'OFFLINE'
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
