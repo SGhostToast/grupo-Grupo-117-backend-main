@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+/* global process */
+
 const PORT = process.env.PORT || 3000;
 
 db.sequelize

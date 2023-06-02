@@ -17,7 +17,7 @@ app.use(router.routes()); // solo se ocupa recuperar las rutas de routes.js
 
 
 // cualquier request recibe esta funcion
-app.use((ctx, next) => {
+app.use((ctx) => {
     ctx.body = "Hola mundo !";
 })
 

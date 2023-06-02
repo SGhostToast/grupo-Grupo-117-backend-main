@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 // para utilizar las variables de .env aqui
 dotenv.config();
 
+/* global process */
+
 const module_exports =  {
   "development": {
     "username": process.env.DB_USERNAME,

@@ -23,6 +23,12 @@ if (configData.use_env_variable) {
   sequelize = new Sequelize(configData.database, configData.username, configData.password, configData);
 }
 
+async function importModel(file) {
+  const module = await import(path.join(__dirname, file));
+  const model = module.default(sequelize, Sequelize.DataTypes);
+  return model;
+}
+
 fs
   .readdirSync(__dirname)
   .filter(file => {
@@ -33,8 +39,8 @@ fs
       file.indexOf('.test.js') === -1
     );
   })
-  .forEach(file => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+  .forEach(async file => {
+    const model = await importModel(file);
     db[model.name] = model;
   });
 
