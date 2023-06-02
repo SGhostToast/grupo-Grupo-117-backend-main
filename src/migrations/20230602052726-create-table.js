@@ -10,19 +10,24 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       clockwise: {
-        type: Sequelize.BOOLEAN
+        type: Sequelize.BOOLEAN,
+        defaultValue: true,
+        allowNull: false
       },
       turns: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        defaultValue: 0
       },
-      insideid: {
-        type: Sequelize.INTEGER
-      },
+      // insideid: {
+      //   type: Sequelize.INTEGER,
+      //   defaultValue: 0
+      // },
       winner: {
         type: Sequelize.STRING
       },
       date: {
-        type: Sequelize.DATEONLY
+        type: Sequelize.DATE,
+        defaultValue: new Date()
       },
       createdAt: {
         allowNull: false,

@@ -2,7 +2,7 @@ module.exports = {
   up: (queryInterface) => queryInterface.bulkInsert('Users', [
     {
       username: 'ghosttoast',
-      password: 'ghosttoast123',
+      password: 'ghosttoast.123',
       mail: 'ghosttoast@uc.cl',
       played_matches: 0,
       won_matches: 0,
@@ -13,7 +13,7 @@ module.exports = {
     },
     {
       username: 'lilianbernot',
-      password: 'lilianbernot123',
+      password: 'lilianbernot.123',
       mail: 'lilianbernot@uc.cl',
       played_matches: 0,
       won_matches: 0,

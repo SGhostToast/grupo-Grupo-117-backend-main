@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
   Table.init({
     clockwise: DataTypes.BOOLEAN,
     turns: DataTypes.INTEGER,
-    insideid: DataTypes.INTEGER,
+    // insideid: DataTypes.INTEGER,
     winner: DataTypes.STRING,
     date: DataTypes.DATEONLY
   }, {

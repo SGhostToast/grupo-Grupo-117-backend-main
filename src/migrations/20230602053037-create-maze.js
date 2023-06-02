@@ -11,14 +11,18 @@ module.exports = {
       },
       gameid: {
         type: Sequelize.INTEGER,
-        references: { model: 'Tables', key: 'id'}
+        references: { model: 'Tables', key: 'id'},
+        allowNull: false
       },
       cardid: {
         type: Sequelize.INTEGER,
-        references: { model: 'Cards', key: 'id'}
+        references: { model: 'Cards', key: 'id'},
+        allowNull: false
       },
       holderid: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
       },
       order: {
         type: Sequelize.INTEGER

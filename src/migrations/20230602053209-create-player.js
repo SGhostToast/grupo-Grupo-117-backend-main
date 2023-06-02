@@ -14,17 +14,20 @@ module.exports = {
       },
       userid: {
         type: Sequelize.INTEGER,
-        references: { model: 'Users', key: 'id'}
+        references: { model: 'Users', key: 'id'},
+        allowNull: false
       },
       gameid: {
         type: Sequelize.INTEGER,
-        references: { model: 'Tables', key: 'id'}
+        references: { model: 'Tables', key: 'id'},
+        allowNull: false
       },
       score: {
         type: Sequelize.INTEGER
       },
       insideid: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
       createdAt: {
         allowNull: false,

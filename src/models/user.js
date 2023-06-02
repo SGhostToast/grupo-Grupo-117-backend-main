@@ -28,9 +28,33 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   User.init({
-    username: DataTypes.STRING,
-    password: DataTypes.STRING,
-    mail: DataTypes.STRING,
+    username: {
+      type: DataTypes.STRING,
+      validate: {
+        is: {
+          args: /^[a-zA-Z0-9._\-!¡?¿$&@]+$/,
+          msg: 'Nombre de usuario inválido. Puedes usar caracteres alfanuméricos y los símbolos ._-!¡?¿$&@'
+        },
+      },
+    },
+    password: {
+      type: DataTypes.STRING,
+      validate: {
+        isValidPassword(value) {
+          if ((!value.match(/[a-z]/)) || (!value.match(/[0-9]/)) || (!value.match(/[._\-!¡?¿$&@]/))) {
+            throw new Error('La clave debe tener al menos una letra, un número y un caracter especial ._-!¡?¿$&@')
+          }
+        },
+      },
+    },
+    mail: {
+      type: DataTypes.STRING,
+      validate: {
+        isEmail: {
+          msg: 'Formato de e-mail incorrecto.'
+        },
+      },
+    },
     played_matches: DataTypes.INTEGER,
     won_matches: DataTypes.INTEGER,
     max_score: DataTypes.INTEGER,
