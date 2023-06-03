@@ -22,6 +22,7 @@ Need to be installed in yarn (yarn add …) :
 
 Other tools :
 - **dotenv** :  Node.js module that loads environment variables from a .env file into process.env, making it easier to manage and configure application-specific settings such as API keys, database credentials, and other environment-dependent configurations
+- **koa-json** : Helps displaying beautiful json objects on a web page. Helps to manually check the endpoints
 
 
 

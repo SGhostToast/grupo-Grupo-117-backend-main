@@ -3,11 +3,15 @@ const koaLogger = require("koa-logger");
 const { koaBody } = require("koa-body");
 const router = require("./routes.js");
 const orm = require("./models/index.js");
+const json = require('koa-json');
+
 
 const { koaSwagger } = require("koa2-swagger-ui");
 const yamljs = require("yamljs");
 
 const app = new koa();
+
+app.use(json()); // just to have a beautiful display of json files when verifying the endpoints
 
 app.context.orm = orm;
 
