@@ -29,20 +29,18 @@ paths:
         name: username
         required: true
         schema: 
-          type: string
+          $ref: '#/components/schemas/User/properties/username'
       - in: query
         name: password
         required: true
         schema: 
-          type: string
+          $ref: '#/components/schemas/User/properties/password'
       - in: query
         name: mail
         required: true
         schema: 
           type: string
-          pattern: '^[a-zA-Z0-9._\\-!¡?¿$&@]+$'
-          example: 'user@example.com'
-          description: 'Invalid mail format. Must contain only letters, numbers, periods, underscores, hyphens, exclamation marks, question marks, dollar signs, ampersands, and at symbols.'
+          $ref: '#/components/schemas/User/properties/mail'
       responses:
         '201':
           description: The user has been created
@@ -61,16 +59,16 @@ paths:
       - in: query
         name: username
         schema: 
-          type: string
+          $ref: '#/components/schemas/User/properties/username'
       - in: query
         name: mail
         schema: 
-          type: string
+          $ref: '#/components/schemas/User/properties/mail'
       - in: query
         name: password
         required: true
         schema: 
-          type: string
+          $ref: '#/components/schemas/User/properties/password'
         schema: 
           anyOf:
             - username
@@ -87,93 +85,55 @@ paths:
 
 
 
-# router.post("users.showfriends", "/showfriends", async(ctx) => {
-#   try {
-#     // This stays like this for now, but when we have multiple sessions and a remote server,
-#     // the user id would be retrieved automatically.
-#     if(ctx.request.body.username) {
-#       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username}});
-#       if (user) {
-#         const friend = await ctx.orm.Friend.findAll({
-#           where: {
-#             [Op.or]: [
-#               {frienderid: user.id, status: 'FRENS'},
-#               {befriendedid: user.id, status: 'FRENS'}
-#             ]
-#           }
-#         });
-#         ctx.body = {
-#           msg: `Lista de amistades.`,
-#           friends: friend
-#         };
-#         ctx.status = 201;
-#       }
-#       else {
-#         throw Error(`No se encontró tu usuario con username ${ctx.request.body.username}.`)
-#       }
-#     }
-#     else {
-#       throw Error('Se necesita entregar tu nombre de usuario como "username".')
-#     }
-#   } catch(error) {
-#     ctx.body = { errorMessage: error.message, errorCode: error.code };
-#     ctx.status = 400;
-#   }
-# })
+  /users/showfriends:
+    post:
+      description: Swhows the friends of a user
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: List of friendships
+                  users:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/User'
+        '400':
+          description: Did not find a user with this username
 
-# router.post("users.pendingfriends", "/pendingfriends", async(ctx) => {
-#   try {
-#     // This stays like this for now, but when we have multiple sessions and a remote server,
-#     // the user id would be retrieved automatically.
-#     if(ctx.request.body.username) {
-#       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username}});
-#       if (user) {
-#         const pending_invites = await ctx.orm.Friend.findAll({where:{befriendedid:user.id, status:'PENDING'}});
-#         ctx.body = {
-#           msg: `Lista de amistades por aceptar/rechazar encontrada.`,
-#           pending_invites: pending_invites
-#         };
-#         ctx.status = 201;
-#       }
-#       else {
-#         throw Error(`No se encontró tu usuario con username ${ctx.request.body.username}.`)
-#       }
-#     }
-#     else {
-#       throw Error('Se necesita entregar tu nombre de usuario como "username".')
-#     }
-#   } catch(error) {
-#     ctx.body = { errorMessage: error.message, errorCode: error.code };
-#     ctx.status = 400;
-#   }
-# })
 
-# router.post("users.pendingrequests", "/pendingrequests", async(ctx) => {
-#   try {
-#     // This stays like this for now, but when we have multiple sessions and a remote server,
-#     // the user id would be retrieved automatically.
-#     if(ctx.request.body.username) {
-#       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username}});
-#       if (user) {
-#         const pending_requests = await ctx.orm.Friend.findAll({where:{frienderid:user.id, status:'PENDING'}});
-#         ctx.body = {
-#           msg: `Lista de solicitudes amistades pendientes enviadas.`,
-#           pending_requests: pending_requests
-#         };
-#         ctx.status = 201;
-#       }
-#       else {
-#         throw Error(`No se encontró tu usuario con username ${ctx.request.body.username}.`)
-#       }
-#     }
-#     else {
-#       throw Error('Se necesita entregar tu nombre de usuario como "username".')
-#     }
-#   } catch(error) {
-#     ctx.body = { errorMessage: error.message, errorCode: error.code };
-#     ctx.status = 400;
-#   }
-# })
+  /users/pendingfriends:
+    post:
+      description: Swhows the pending invitations of a user
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: List of friendships to accept or refuse
+                  users:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/User'
+        '400':
+          description: Did not find a user with this username
+
 
 # router.post("users.befriend", "/befriend", async(ctx) => {
 #   try {
@@ -302,12 +262,13 @@ components:
       properties:
         username:
           type: string
+          example: Lilou
           pattern: /^[a-zA-Z0-9._\-!¡?¿$&@]+$/
         password:
           type: string
         mail:
           type: string
-          # example: 'user@example.com'
+          example: 'user@example.com'
         played_matches: 
           type: integer
         won_matches: 
