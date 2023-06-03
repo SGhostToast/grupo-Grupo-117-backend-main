@@ -20,7 +20,21 @@ paths:
                   $ref: '#/components/schemas/User'
         '400':
           description: Bad Request
-  
+    
+  /users/:id:
+    get:
+      description: Display the information of the user of this id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Dis not find a user with this idea.
+
+
   /users/signup:
     post:
       description: Creates a user
@@ -135,125 +149,62 @@ paths:
           description: Did not find a user with this username
 
 
-# router.post("users.befriend", "/befriend", async(ctx) => {
-#   try {
-#     // This stays like this for now, but when we have multiple sessions and a remote server,
-#     // the user id would be retrieved automatically.
-#     if(ctx.request.body.myusername && ctx.request.body.friendusername) {
-#       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.myusername}});
-#       if (!user) {
-#         throw Error(`No se encontró tu usuario con username ${ctx.request.body.myusername}.`);
-#       }
-#       const friend = await ctx.orm.User.findOne({where:{username:ctx.request.body.friendusername}});
-#       if (!friend) {
-#         throw Error(`No se encontró el usuario de tu amigo con username ${ctx.request.body.friendusername}.`);
-#       }
-#       if (user.id == friend.id) {
-#         throw Error(`Ya eres amigx de ti mismx c;`);
-#       }
-#       let msg;
-#       let friendship = await ctx.orm.Friend.findOne({
-#         where: {
-#           [Op.or]: [
-#             { frienderid: user.id, befriendedid: friend.id },
-#             { frienderid: friend.id, befriendedid: user.id }
-#           ]
-#         }
-#       });
-#       if (friendship) {
-#         if (friendship.status == 'FRENS') {
-#           throw Error(`Tu y ${ctx.request.body.friendusername} ya tienen una linda amistad desde antes c:`);
-#         }
-#         else if (friendship.frienderid == user.id) {
-#           throw Error(`Ya le has enviado una solicitud de amistad a ${ctx.request.body.friendusername} anteriormente.`);
-#         }
-#         friendship.status = 'FRENS';
-#         friendship.save();
-#         msg = `¡La solicitud de amistad de ${ctx.request.body.friendusername} ha sido aceptada!`;
-#       }
-#       else {
-#         const info = {
-#           frienderid: user.id,
-#           befriendedid: friend.id,
-#         }
-#         friendship = await ctx.orm.Friend.create(info);
-#         msg = `¡Le has enviado una solicitud de amistad a ${ctx.request.body.friendusername}!`
-#       }
-#       ctx.body = {
-#         msg: msg,
-#         friendship: friendship
-#       };
-#       ctx.status = 201;
-#     }
-#     else {
-#       throw Error('Se necesita entregar tu nombre de usuario como "myusername" y el de tu amigx como "friendusername".')
-#     }
-#   } catch(error) {
-#     ctx.body = { errorMessage: error.message, errorCode: error.code };
-#     ctx.status = 400;
-#   }
-# })
+  /users/befriend:
+    post:
+      description: Swhows the pending invitations of a user
+      parameters:
+      - in: query
+        name: myusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      - in: query
+        name: friendusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: Your invitaion as been sent Or your invitation has been accepted.
+                  users:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/Friend'
+        '400':
+          description: Did not find a user with your / your friend's username Or you are already friend of yourself Or your are already friends 
 
-# router.post("users.unfriend", "/unfriend", async(ctx) => {
-#   try {
-#     // This stays like this for now, but when we have multiple sessions and a remote server,
-#     // the user id would be retrieved automatically.
-#     if(ctx.request.body.myusername && ctx.request.body.otherusername) {
-#       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.myusername}});
-#       if (!user) {
-#         throw Error(`No se encontró tu usuario con username ${ctx.request.body.myusername}.`)
-#       }
-#       const other = await ctx.orm.User.findOne({where:{username:ctx.request.body.otherusername}});
-#       if (!other) {
-#         throw Error(`No se encontró el usuario del usuario con username ${ctx.request.body.otherusername}.`)
-#       }
-#       const friendship = await ctx.orm.Friend.findOne({
-#         where: {
-#           [Op.or]: [
-#             {frienderid: other.id, befriendedid: user.id},
-#             {frienderid: user.id, befriendedid: other.id}
-#           ]
-#         }
-#       });
-#       let msg;
-#       if (!friendship) {
-#         throw Error(`No hay ni solicitud ni amistad por parte del usuario ${ctx.request.body.otherusername}.`)
-#       }
-#       else if (friendship.status == 'FRENS') {
-#         msg = `Amistad con ${ctx.request.body.otherusername} terminada.`;
-#       }
-#       else if (friendship.status == 'PENDING' && friendship.frienderid == user.id) {
-#         msg = `Solicitud de amistad a ${ctx.request.body.otherusername} cancelada.`;
-#       }
-#       else {
-#         msg = `Solicitud de amistad de ${ctx.request.body.otherusername} rechazada.`;
-#       }
-#       await friendship.destroy();
-#       ctx.body = {
-#         msg: msg,
-#       };
-#       ctx.status = 201;
-#     }
-#     else {
-#       throw Error('Se necesita entregar tu nombre de usuario como "myusername" y el de la otra persona como "otherusername".')
-#     }
-#   } catch(error) {
-#     ctx.body = { errorMessage: error.message, errorCode: error.code };
-#     ctx.status = 400;
-#   }
-# })
 
-# router.get("users.show", "/:id", async(ctx) => {
-#   try {
-#     // const user = await ctx.orm.User.findByPk(ctx.params.id);
-#     const user = await ctx.orm.User.findOne({where:{id:ctx.params.id}});
-#     ctx.body = user;
-#     ctx.status = 200;
-#   } catch(error) {
-#     ctx.body = error;
-#     ctx.status = 400;
-#   }
-# })
+  /users/unfriend:
+    post:
+      description: Swhows the pending invitations of a user
+      parameters:
+      - in: query
+        name: myusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      - in: query
+        name: otherusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: The invitation has been canceled Or the invitation you have received has been refused Or the frienship is finished.
+                  users:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/Friend'
+        '400':
+          description: Did not find a user with your / the other username Or there are no invitation between both of you 
 
 components:
   schemas:
@@ -280,3 +231,13 @@ components:
         status: 
           type: string
           enum: ['OFFLINE', 'ONLINE', 'PLAYING']  
+
+    Friend:
+      type: object
+      properties:
+        frienderid:
+          type: integer
+        befriendedid:
+          type: integer
+        status:
+          enum: ['PENDING', 'FRENS']
