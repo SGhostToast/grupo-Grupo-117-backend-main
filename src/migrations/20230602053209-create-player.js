@@ -24,14 +24,16 @@ module.exports = {
         allowNull: false
       },
       score: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        defaultValue: 0
       },
       insideid: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+        type: Sequelize.INTEGER
       },
       status: {
-        type: Sequelize.STRING
+        type: Sequelize.ENUM('PENDING', 'READY', 'PLAYING', 'WINNER', 'LOSER'),
+        allowNull: false,
+        defaultValue: 'PENDING'
       },
       createdAt: {
         allowNull: false,

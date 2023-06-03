@@ -3,6 +3,10 @@ const { Op } = require('sequelize');
 
 const router = new Router();
 
+// ********** POSTS **********
+
+// ---------- Login & Signup ----------
+
 router.post("users.create", "/signup", async(ctx) => {
   try {
     const user = await ctx.orm.User.create(ctx.request.body);
@@ -48,10 +52,12 @@ router.post("users.enter", "/login", async(ctx) => {
     }
     ctx.status = 200;
   } catch(error) {
-    ctx.body = { errorMessage: error.message, errorCode: error.code };
+    ctx.body = {errorMessage: error.message, errorCode: error.code};
     ctx.status = 400;
   }
 })
+
+// ---------- Friends ----------
 
 router.post("users.showfriends", "/showfriends", async(ctx) => {
   try {
@@ -60,7 +66,7 @@ router.post("users.showfriends", "/showfriends", async(ctx) => {
     if(ctx.request.body.username) {
       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username}});
       if (user) {
-        const friend = await ctx.orm.Friend.findAll({
+        const friends = await ctx.orm.Friend.findAll({
           where: {
             [Op.or]: [
               {frienderid: user.id, status: 'FRENS'},
@@ -70,7 +76,7 @@ router.post("users.showfriends", "/showfriends", async(ctx) => {
         });
         ctx.body = {
           msg: `Lista de amistades.`,
-          friends: friend
+          friends: friends
         };
         ctx.status = 201;
       }
@@ -82,7 +88,7 @@ router.post("users.showfriends", "/showfriends", async(ctx) => {
       throw Error('Se necesita entregar tu nombre de usuario como "username".')
     }
   } catch(error) {
-    ctx.body = { errorMessage: error.message, errorCode: error.code };
+    ctx.body = {errorMessage: error.message, errorCode: error.code};
     ctx.status = 400;
   }
 })
@@ -109,7 +115,7 @@ router.post("users.pendingfriends", "/pendingfriends", async(ctx) => {
       throw Error('Se necesita entregar tu nombre de usuario como "username".')
     }
   } catch(error) {
-    ctx.body = { errorMessage: error.message, errorCode: error.code };
+    ctx.body = {errorMessage: error.message, errorCode: error.code};
     ctx.status = 400;
   }
 })
@@ -136,7 +142,7 @@ router.post("users.pendingrequests", "/pendingrequests", async(ctx) => {
       throw Error('Se necesita entregar tu nombre de usuario como "username".')
     }
   } catch(error) {
-    ctx.body = { errorMessage: error.message, errorCode: error.code };
+    ctx.body = {errorMessage: error.message, errorCode: error.code};
     ctx.status = 400;
   }
 })
@@ -145,7 +151,7 @@ router.post("users.befriend", "/befriend", async(ctx) => {
   try {
     // This stays like this for now, but when we have multiple sessions and a remote server,
     // the user id would be retrieved automatically.
-    if(ctx.request.body.myusername && ctx.request.body.friendusername) {
+    if (ctx.request.body.myusername && ctx.request.body.friendusername) {
       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.myusername}});
       if (!user) {
         throw Error(`No se encontró tu usuario con username ${ctx.request.body.myusername}.`);
@@ -195,7 +201,7 @@ router.post("users.befriend", "/befriend", async(ctx) => {
       throw Error('Se necesita entregar tu nombre de usuario como "myusername" y el de tu amigx como "friendusername".')
     }
   } catch(error) {
-    ctx.body = { errorMessage: error.message, errorCode: error.code };
+    ctx.body = {errorMessage: error.message, errorCode: error.code};
     ctx.status = 400;
   }
 })
@@ -244,10 +250,12 @@ router.post("users.unfriend", "/unfriend", async(ctx) => {
       throw Error('Se necesita entregar tu nombre de usuario como "myusername" y el de la otra persona como "otherusername".')
     }
   } catch(error) {
-    ctx.body = { errorMessage: error.message, errorCode: error.code };
+    ctx.body = {errorMessage: error.message, errorCode: error.code};
     ctx.status = 400;
   }
 })
+
+// ********** GETS **********
 
 router.get("users.list", "/", async(ctx) => {
   try {

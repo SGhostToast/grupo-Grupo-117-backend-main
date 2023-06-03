@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     gameid: DataTypes.INTEGER,
     score: DataTypes.INTEGER,
     insideid: DataTypes.INTEGER,
-    status: DataTypes.STRING
+    status: DataTypes.ENUM('PENDING', 'READY', 'PLAYING', 'WINNER', 'LOSER')
   }, {
     // https://sequelize.org/docs/v6/other-topics/hooks/
     hooks: {

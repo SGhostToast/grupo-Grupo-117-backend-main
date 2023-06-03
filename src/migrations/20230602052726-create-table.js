@@ -9,12 +9,16 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      ownerid: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
       clockwise: {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
         allowNull: false
       },
-      turns: {
+      turn: {
         type: Sequelize.INTEGER,
         defaultValue: 0
       },
@@ -22,9 +26,9 @@ module.exports = {
       //   type: Sequelize.INTEGER,
       //   defaultValue: 0
       // },
-      winner: {
-        type: Sequelize.STRING
-      },
+      // winner: {
+      //   type: Sequelize.STRING
+      // },
       date: {
         type: Sequelize.DATE,
         defaultValue: new Date()

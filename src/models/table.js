@@ -20,11 +20,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Table.init({
+    ownerid: DataTypes.INTEGER,
     clockwise: DataTypes.BOOLEAN,
-    turns: DataTypes.INTEGER,
+    turn: DataTypes.INTEGER,
     // insideid: DataTypes.INTEGER,
-    winner: DataTypes.STRING,
-    date: DataTypes.DATEONLY
+    // winner: DataTypes.STRING,
+    date: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Table',
