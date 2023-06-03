@@ -8,6 +8,7 @@ Need to be installed in yarn (yarn add …) :
 - **koa-logger** : middleware for the Koa framework that logs HTTP request and response details, such as the method, URL, status code, and response time, to the console or a specified output stream
 - **koa-body** : middleware for the Koa framework that parses and extracts the request body data
 - **koa-router** : routing middleware for the Koa framework that handles HTTP request routing and URL pattern matching
+- **koa-json** : Helps displaying beautiful json objects on a web page. Helps to manually check the endpoints
 
 ### For the database :
 - **postgresql** : open-source relational database management system that provides data storage, retrieval, and advanced features for managing structured data
@@ -22,7 +23,6 @@ Need to be installed in yarn (yarn add …) :
 
 Other tools :
 - **dotenv** :  Node.js module that loads environment variables from a .env file into process.env, making it easier to manage and configure application-specific settings such as API keys, database credentials, and other environment-dependent configurations
-- **koa-json** : Helps displaying beautiful json objects on a web page. Helps to manually check the endpoints
 
 
 
@@ -90,3 +90,77 @@ Finally, to launch the app, use :
 ```bash
 >>> yarn dev
 ```
+
+To see the documentation of the API, go on the endpoint "swagger/".
+
+
+## Database
+
+### `Tables`
+
+| `Name`     | `Comment`             | 
+| ---------- | --------------------- | 
+| User       |                       | 
+| Player     |                       | 
+| Table      |                       | 
+| CommonMaze |                       | 
+| Card       |                       | 
+
+
+
+### `User`
+
+| `Property`     | `Type`     | `Key`        | `Nullable` | `Default` | `Comment`       |
+| -------------- | ---------- | ------------ | ---------- | --------- | --------------- |
+| id             |            | Primary key  |            |           |                 |
+| username       |            | -            |            |           |                 |
+| password       |            | -            |            |           |                 |
+| mail           |            | -            |            |           |                 |
+| played_matches |            | -            |            |           |                 |
+| won_matches    |            | -            |            |           |                 |
+| max_score      |            | -            |            |           |                 |
+| total_score    |            | -            |            |           |                 |
+
+
+### `Player`
+
+| `Property`     | `Type`     | `Key`        | `Nullable` | `Default` | `Comment`       |
+| -------------- | ---------- | ------------ | ---------- | --------- | --------------- |
+| id             |            | Primary kay  |            |           |                 |
+| name           |            | -            |            |           |                 |
+| userid         |            | Foreign key  |            |           |                 |
+| gameid         |            | Foreign key  |            |           |                 |
+| score          |            | -            |            |           |                 |
+| id_within_game |            | -            |            |           |                 |
+
+
+### `Table`
+
+| `Property`     | `Type`     | `Key`        | `Nullable` | `Default` | `Comment`       |
+| -------------- | ---------- | ------------ | ---------- | --------- | --------------- |
+| id             |            | Primary key  |            |           |                 |
+| direction      |            | -            |            |           |                 |
+| turns          |            | -            |            |           |                 |
+| id_within_game |            | -            |            |           |                 |
+| winner         |            | -            |            |           |                 |
+| date           |            | -            |            |           |                 |
+
+
+### `CommonMaze`
+
+| `Property`| `Type`     | `Key`        | `Nullable` | `Default` | `Comment`       |
+| --------- | ---------- | ------------ | ---------- | --------- | --------------- |
+| id        |            | Primary key  |            |           |                 |
+| gameid    |            | Foreign key  |            |           |                 |
+| cardid    |            | Foreign key  |            |           |                 |
+| holderid  |            | -            |            |           |                 |
+| order     |            | -            |            |           |                 |
+
+
+### `Card`
+
+| `Property`| `Type`     | `Key`        | `Nullable` | `Default` | `Comment`       |
+| --------- | ---------- | ------------ | ---------- | --------- | --------------- |
+| id        |            | Primary key  |            |           |                 |
+| colo      |            | -            |            |           |                 |
+| symbol    |            | -            |            |           |                 |
