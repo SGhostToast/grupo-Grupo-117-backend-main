@@ -100,11 +100,12 @@ To see the documentation of the API, go on the endpoint "swagger/".
 
 | `Name`     | `Comment`             | 
 | ---------- | --------------------- | 
-| User       |                       | 
-| Player     |                       | 
-| Table      |                       | 
-| CommonMaze |                       | 
-| Card       |                       | 
+| User       | Users of the app                                                   | 
+| Player     | Players: controlled by users, they are the ones who play           | 
+| Friends    | Relation table to store the friendship between two users           | 
+| Game       | Global informations of a game                                      | 
+| CommonMaze | Informations of what is going on at a the current moment in a game | 
+| Card       | Stores all different cards of the game                             | 
 
 
 
@@ -112,55 +113,65 @@ To see the documentation of the API, go on the endpoint "swagger/".
 
 | `Property`     | `Type`     | `Key`        | `Nullable` | `Default` | `Comment`       |
 | -------------- | ---------- | ------------ | ---------- | --------- | --------------- |
-| id             |            | Primary key  |            |           |                 |
-| username       |            | -            |            |           |                 |
-| password       |            | -            |            |           |                 |
-| mail           |            | -            |            |           |                 |
-| played_matches |            | -            |            |           |                 |
-| won_matches    |            | -            |            |           |                 |
-| max_score      |            | -            |            |           |                 |
-| total_score    |            | -            |            |           |                 |
+| id             | integer    | Primary key  |            |           |                 |
+| username       | string     | -            |            |           | `/^[a-zA-Z0-9._\-!¡?¿$&@]+$/` |
+| password       | string     | -            |            |           | Confidential                  |
+| mail           | string     | -            |            |           | UNIQUE                        |
+| played_matches | integer    | -            |            |           | Statistics of the user                |
+| won_matches    | integer    | -            |            |           | Statistics of the user                |
+| max_score      | integer    | -            |            |           | Statistics of the user                |
+| total_score    | integer    | -            |            |           | Statistics of the user                |
+| status         | integer    | -            |            |           | 'OFFLINE', 'ONLINE', 'PLAYING'        |
+
+### `Friends`
+
+| `Property`     | `Type`     | `Key`        | `Nullable` | `Default` | `Comment`       |
+| -------------- | ---------- | ------------ | ---------- | --------- | --------------- |
+| id             | integer    | Primary key  |            |           |                 |
+| frienderid     | integer    | Foreign key  |            |           | One member of the friendship |
+| befriendedid   | integer    | Foreign key  |            |           | The other                    |
+| status         | string     | -            |            |           | 'PENDING', 'FRENS'           |
 
 
 ### `Player`
 
 | `Property`     | `Type`     | `Key`        | `Nullable` | `Default` | `Comment`       |
 | -------------- | ---------- | ------------ | ---------- | --------- | --------------- |
-| id             |            | Primary kay  |            |           |                 |
-| name           |            | -            |            |           |                 |
-| userid         |            | Foreign key  |            |           |                 |
-| gameid         |            | Foreign key  |            |           |                 |
-| score          |            | -            |            |           |                 |
-| id_within_game |            | -            |            |           |                 |
+| id             | integer    | Primary kay  |            |           |                 |
+| name           | string     | -            |            |           |                 |
+| userid         | integer    | Foreign key  |            |           | The user currently controlling the player |
+| gameid         | integer    | Foreign key  |            |           | The game in which it currently plays      |
+| score          | integer    | -            |            |           | It's curent score                         |
+| insideid       | integer    | -            |            |           |                 |
+| status         | string     | -            |            |           |                 |
 
 
-### `Table`
+### `Game`
 
 | `Property`     | `Type`     | `Key`        | `Nullable` | `Default` | `Comment`       |
 | -------------- | ---------- | ------------ | ---------- | --------- | --------------- |
-| id             |            | Primary key  |            |           |                 |
-| direction      |            | -            |            |           |                 |
-| turns          |            | -            |            |           |                 |
-| id_within_game |            | -            |            |           |                 |
-| winner         |            | -            |            |           |                 |
-| date           |            | -            |            |           |                 |
+| id             | integer    | Primary key  |            |           |                 |
+| clockwise      | boolean    | -            |            |           | To know who plays next  |
+| turns          | integer    | -            |            |           | Number of turns         |
+| winner         | string     | -            |            |           | Only at the end         |
+| date           | dateonly   | -            |            |           | Date of creation        |
 
 
 ### `CommonMaze`
 
 | `Property`| `Type`     | `Key`        | `Nullable` | `Default` | `Comment`       |
 | --------- | ---------- | ------------ | ---------- | --------- | --------------- |
-| id        |            | Primary key  |            |           |                 |
-| gameid    |            | Foreign key  |            |           |                 |
-| cardid    |            | Foreign key  |            |           |                 |
-| holderid  |            | -            |            |           |                 |
-| order     |            | -            |            |           |                 |
+| id        | integer    | Primary key  |            |           |                 |
+| gameid    | integer    | Foreign key  |            |           | The game in play                |
+| cardid    | integer    | Foreign key  |            |           | The card on the table           |
+| holderid  | integer    | -            |            |           | The player who can play         |
+| order     | integer    | -            |            |           |                                 |
 
 
 ### `Card`
 
 | `Property`| `Type`     | `Key`        | `Nullable` | `Default` | `Comment`       |
 | --------- | ---------- | ------------ | ---------- | --------- | --------------- |
-| id        |            | Primary key  |            |           |                 |
-| colo      |            | -            |            |           |                 |
-| symbol    |            | -            |            |           |                 |
+| id        | string     | Primary key  |            |           |                 |
+| color     | string     | -            |            |           |                 |
+| symbol    | string     | -            |            |           |                 |
