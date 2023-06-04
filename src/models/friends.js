@@ -9,7 +9,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       validate: {
         isImmutable() {
-          throw new Error('El valor del atributo "frienderid" no puede ser modificado');
+          if (!this.isNewRecord) {
+            throw new Error('El valor del atributo "frienderid" no puede ser modificado');
+          }
         }
       }
     },
@@ -17,7 +19,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       validate: {
         isImmutable() {
-          throw new Error('El valor del atributo "befriendedid" no puede ser modificado');
+          if (!this.isNewRecord) {
+            throw new Error('El valor del atributo "befriendedid" no puede ser modificado');
+          }
         }
       }
     },
