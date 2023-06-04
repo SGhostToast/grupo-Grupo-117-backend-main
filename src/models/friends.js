@@ -5,8 +5,22 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Friend extends Model {}
   Friend.init({
-    frienderid: DataTypes.INTEGER,
-    befriendedid: DataTypes.INTEGER,
+    frienderid: {
+      type: DataTypes.INTEGER,
+      validate: {
+        isImmutable() {
+          throw new Error('El valor del atributo "frienderid" no puede ser modificado');
+        }
+      }
+    },
+    befriendedid: {
+      type: DataTypes.INTEGER,
+      validate: {
+        isImmutable() {
+          throw new Error('El valor del atributo "befriendedid" no puede ser modificado');
+        }
+      }
+    },
     status: DataTypes.ENUM('PENDING', 'FRENS')
   }, {
     sequelize,

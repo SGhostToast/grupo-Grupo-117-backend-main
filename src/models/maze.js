@@ -20,8 +20,22 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Maze.init({
-    gameid: DataTypes.INTEGER,
-    cardid: DataTypes.INTEGER,
+    gameid: {
+      type: DataTypes.INTEGER,
+      validate: {
+        isImmutable() {
+          throw new Error('El valor del atributo "gameid" no puede ser modificado');
+        }
+      }
+    },
+    cardid: {
+      type: DataTypes.INTEGER,
+      validate: {
+        isImmutable() {
+          throw new Error('El valor del atributo "cardid" no puede ser modificado');
+        }
+      }
+    },
     holderid: DataTypes.INTEGER,
     order: DataTypes.INTEGER
   }, {

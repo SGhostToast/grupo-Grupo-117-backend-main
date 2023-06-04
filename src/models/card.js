@@ -17,8 +17,22 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Card.init({
-    color: DataTypes.STRING,
-    symbol: DataTypes.STRING
+    color: {
+      type: DataTypes.STRING,
+      validate: {
+        isImmutable() {
+          throw new Error('El valor del atributo "color" no puede ser modificado');
+        }
+      }
+    },
+    symbol: {
+      type: DataTypes.STRING,
+      validate: {
+        isImmutable() {
+          throw new Error('El valor del atributo "symbol" no puede ser modificado');
+        }
+      }
+    }
   }, {
     sequelize,
     modelName: 'Card',

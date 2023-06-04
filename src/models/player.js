@@ -24,8 +24,22 @@ module.exports = (sequelize, DataTypes) => {
   }
   Player.init({
     name: DataTypes.STRING,
-    userid: DataTypes.INTEGER,
-    gameid: DataTypes.INTEGER,
+    userid: {
+      type: DataTypes.INTEGER,
+      validate: {
+        isImmutable() {
+          throw new Error('El valor del atributo "cardid" no puede ser modificado');
+        }
+      }
+    },
+    gameid: {
+      type: DataTypes.INTEGER,
+      validate: {
+        isImmutable() {
+          throw new Error('El valor del atributo "cardid" no puede ser modificado');
+        }
+      }
+    },
     score: DataTypes.INTEGER,
     insideid: DataTypes.INTEGER,
     status: DataTypes.ENUM('PENDING', 'READY', 'PLAYING', 'WINNER', 'LOSER')
@@ -33,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
     // https://sequelize.org/docs/v6/other-topics/hooks/
     hooks: {
       afterCreate: (player) => {
-        if (player.name == null) {
+        if (!player.name) {
           return User.findByPk(player.userid)
             .then(user => {
               player.name = user.username;
@@ -41,6 +55,11 @@ module.exports = (sequelize, DataTypes) => {
             });
         }
         return 1;
+      },
+      beforeUpdate: (player) => {
+        if (player.insideid) {
+          throw new Error('"insideid" ya ha sido inicializado y no permite modificación.');
+        }
       }
     },
     sequelize,

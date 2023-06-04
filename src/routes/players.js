@@ -120,13 +120,14 @@ router.post("players.accept", "/accept", async(ctx) => {
     if(ctx.request.body.username && ctx.request.body.gameid) {
       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username}});
       if (user) {
+        const already_playing = await ctx.orm.Player.findOne({where:{userid:user.id, status:'PLAYING'}});
+        if (already_playing) {
+          throw Error(`Ya estás jugando el juego de id ${already_playing.gameid} que está en curso. No puedes jugar múltiples partidas a la vez.`);
+        }
         const player = await ctx.orm.Player.findOne({where:{userid:user.id, gameid:ctx.request.body.gameid}});
         if (player) {
           if (player.status == 'WINNER' || player.status == 'LOSER') {
             throw Error(`Ya has participado del juego de id ${ctx.request.body.gameid}, y este ya terminó.`);
-          }
-          else if (player.status == 'PLAYING') {
-            throw Error(`Ya estás jugando el juego de id ${ctx.request.body.gameid} que está en curso.`);
           }
           else if (player.status == 'READY') {
             throw Error(`Ya estás esperando a que el juego de id ${ctx.request.body.gameid} comience.`);
@@ -175,13 +176,7 @@ router.post("players.quit", "/quit", async(ctx) => {
             throw Error(`Ya has participado del juego de id ${ctx.request.body.gameid}, y este ya terminó.`);
           }
           else if (player.status == 'PLAYING') {
-            player.status = 'LOSER';
-            player.save();
-            ctx.body = {
-              msg: `Te has rendido en el juego de id ${ctx.request.body.gameid}.`,
-              player: player
-            };
-          ctx.status = 201;
+            throw Error(`Para rendirte en el juego de id ${ctx.request.body.gameid}, por favor hazlo a través de /ingame.`);
           }
           else if (player.status == 'READY') {
             await player.destroy();
@@ -298,6 +293,24 @@ router.get("players.show", "/:id", async(ctx) => {
     ctx.status = 200;
   } catch(error) {
     ctx.body = error;
+    ctx.status = 400;
+  }
+})
+
+router.get("players.show", "/meingame/:userid", async(ctx) => {
+  try {
+    // const user = await ctx.orm.User.findByPk(ctx.params.id);
+    const player = await ctx.orm.Player.findOne({where:{userid:ctx.params.userid, status:'PLAYING'}});
+    if (!player) {
+      throw Error(`Tu usuario de id ${ctx.params.userid} no se encuentra en un juego en curso.`);
+    }
+    ctx.body = {
+      msg: `Tu perfil de jugador en el juego actual es:`,
+      top_card: player,
+    };
+    ctx.status = 200;
+  } catch(error) {
+    ctx.body = {errorMessage: error.message, errorCode: error.code};
     ctx.status = 400;
   }
 })
