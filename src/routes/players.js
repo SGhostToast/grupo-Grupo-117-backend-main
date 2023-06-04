@@ -247,13 +247,14 @@ router.post("players.begin", "/begin", async(ctx) => {
               const i = Math.floor(Math.random() * (ordered_players.lenght - 1));
               shuffled_players.push(ordered_players.splice(i, 1)[0]);
             }
-            let i = 1;
+            let i = 2;
             for (const plyer of shuffled_players) {
               plyer.status = 'PLAYING';
               plyer.insideid = i;
               plyer.save();
               i++;
             }
+            createGameMaze(ctx, game.id, shuffled_players);
             ctx.body = {
               msg: `¡Ha comenzado el juego de id ${ctx.request.body.gameid}!`,
               players: shuffled_players
@@ -300,5 +301,50 @@ router.get("players.show", "/:id", async(ctx) => {
     ctx.status = 400;
   }
 })
+
+async function createGameMaze(ctx, gameid, players) {
+  const cards = await ctx.orm.Cards.findAll();
+  let maze = [];
+  for (const card of cards) {
+    const mazedata = {
+      gameid: gameid,
+      cardid: card.id,
+    };
+    if (card.symbol != '0') {
+      const mazecarddouble = await ctx.orm.Maze.create(mazedata);
+      maze.push(mazecarddouble);
+    }
+    const mazecard = await ctx.orm.Maze.create(mazedata);
+    maze.push(mazecard);
+  }
+
+  let shuffled_maze = [];
+  while (maze.lenght > 0) {
+    const i = Math.floor(Math.random() * (maze.lenght - 1));
+    shuffled_maze.push(maze.splice(i, 1)[0]);
+  }
+
+  for (const player of players) {
+    for (let i = 0; i <= 6; i++) {
+      const put_card = shuffled_maze.pop()
+      put_card.holderid = player.insideid;
+      put_card.order = i;
+      put_card.save()
+    }
+  }
+
+  for (let i = 0; i < shuffled_maze.lenght; i++) {
+    if (i == (shuffled_maze.length - 1)) {
+      // default holderid = 0 => Mazo para sacar.
+      // holderid = 1 => Mazo descarte.
+      shuffled_maze[i].order = 0;
+      shuffled_maze[i].holderid = 1;
+    }
+    else {
+      shuffled_maze[i].order = i;
+    }
+    shuffled_maze[i].save()
+  }
+}
 
 module.exports = router;
