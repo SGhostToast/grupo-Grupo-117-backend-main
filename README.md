@@ -1,34 +1,32 @@
-# Web_backend
-
-## Installations
+# Installations
 
 Need to be installed in yarn (yarn add …) :
 
-### For the app server : 
+## For the app server : 
 - **koa-logger** : middleware for the Koa framework that logs HTTP request and response details, such as the method, URL, status code, and response time, to the console or a specified output stream
 - **koa-body** : middleware for the Koa framework that parses and extracts the request body data
 - **koa-router** : routing middleware for the Koa framework that handles HTTP request routing and URL pattern matching
 - **koa-json** : Helps displaying beautiful json objects on a web page. Helps to manually check the endpoints
 
-### For the database :
+## For the database :
 - **postgresql** : open-source relational database management system that provides data storage, retrieval, and advanced features for managing structured data
 - **postgresql-contrib** : collection of additional extensions and plugins that enhance the functionality of PostgreSQL
 - **sequelize** : ORM (Object-Relational Mapping) library for Node.js that simplifies database operations by providing an abstraction layer for interacting with SQL databases, including PostgreSQL
 - **sequelize-cli** : command-line interface tool for Sequelize that provides commands to generate models, migrations, and other database-related artifacts, making it easier to work with Sequelize in a development environment
 - **pg** : Node.js library that provides a PostgreSQL client for interacting with a PostgreSQL database, allowing you to execute SQL queries, manage transactions, and handle database connections
 
-### For Swagger, the documentation : 
+## For Swagger, the documentation : 
 - **koa2-swagger-ui** :  integration between Koa and Swagger UI. It allows you to easily serve and display Swagger API documentation within the Koa application
 - **yamljs** : YAML parser and serializer for JavaScript
 
-Other tools :
+## Other tools :
 - **dotenv** :  Node.js module that loads environment variables from a .env file into process.env, making it easier to manage and configure application-specific settings such as API keys, database credentials, and other environment-dependent configurations
 
 
 
-## Launching the database
+# Launching the database
 
-### Inistallation and connection to postgres
+## Inistallation and connection to postgres
 
 To launch the database:
 ```bash
@@ -58,7 +56,7 @@ To connect to the database with the superuser :
 >>> psql – U user_name -d db_name -h 127.0.0.1
 ```
 
-### Configuration for the project
+## Specific configuration of the database for the project
 
 To configure locally the database, everything is written in a .env file, having the following informations : 
 - DB_USERNAME
@@ -83,20 +81,9 @@ postgres> CREATE DATABASE db_name ; 
 >>> sudo -u postgres createdb db_name
 ```
 
+# Database model
 
-## Launching the project
-
-Finally, to launch the app, use :
-```bash
->>> yarn dev
-```
-
-To see the documentation of the API, go on the endpoint "swagger/".
-
-
-## Database
-
-### `Tables`
+## `Tables`
 
 | `Name`     | `Comment`             | 
 | ---------- | --------------------- | 
@@ -175,3 +162,76 @@ To see the documentation of the API, go on the endpoint "swagger/".
 | id        | string     | Primary key  |            |           |                 |
 | color     | string     | -            |            |           |                 |
 | symbol    | string     | -            |            |           |                 |
+
+
+# Documentation with Swagger
+
+The documentation of the API is disponible on the endpoint "swagger/".
+
+Swagger is a tool that helps you visualize and test the design of a web app. In this page, you will be able to see the implemented models and the different endpoints. 
+You can see with what type of verb (GET, POST) the endpoint works. 
+You can also see the parameters and the output of the request.
+Finally, Swagger allows you to test all of this by giving it your own input.
+
+Here are two examples of endpoints you can visit. 
+
+## List of users
+
+Working with the GET verb, the list of users is disponible on /users. 
+
+Swagger will tell you the following : 
+- Parameters : No parameters 
+- Responses : 
+    * 400 : Bad Request
+    * 200, Successful response. Example value : 
+```json
+[
+  {
+    "username": "username",
+    "password": "user_password",
+    "mail": "user@example.com",
+    "played_matches": 0,
+    "won_matches": 0,
+    "max_score": 0,
+    "total_score": 0,
+    "status": "OFFLINE"
+  }
+] 
+```
+
+## Login
+
+Working with the POST verb, the login of user is disponible on /users/login. 
+
+Swagger will tell you the following : 
+- Parameters : 
+
+| `Name`    | `Description`| 
+| --------- | ---------- | 
+| username  _string_        | username     |
+| mail  _string_            | user@example.com     | 
+| password<sup><span style="color:red;">* required</span></sup>  _string_    | user_password     | 
+
+- Responses : 
+    * 400: Either the username/mail does not exist or the password does not correspond.
+    * 200, Your are logged as user ! Example Value :
+```json
+  {
+    "username": "username",
+    "password": "user_password",
+    "mail": "user@example.com",
+    "played_matches": 0,
+    "won_matches": 0,
+    "max_score": 0,
+    "total_score": 0,
+    "status": "OFFLINE"
+  }
+```
+
+
+# Launching the project
+
+Finally, to launch the app, use :
+```bash
+>>> yarn dev
+```
