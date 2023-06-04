@@ -1,0 +1,244 @@
+openapi: '3.0.2'
+info:
+  title: Uno Online
+  version: '1.0'
+servers:
+  - url: https://localhost:3000
+basePath: /
+paths:
+  /users/:
+    get:
+      description: Display the list of the users in the database
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: Bad Request
+    
+  /users/:id:
+    get:
+      description: Display the information of the user of this id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Dis not find a user with this idea.
+
+
+  /users/signup:
+    post:
+      description: Creates a user
+      parameters:
+      - in: query
+        name: username
+        required: true
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      - in: query
+        name: password
+        required: true
+        schema: 
+          $ref: '#/components/schemas/User/properties/password'
+      - in: query
+        name: mail
+        required: true
+        schema: 
+          type: string
+          $ref: '#/components/schemas/User/properties/mail'
+      responses:
+        '201':
+          description: The user has been created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: The user could not be created
+
+
+  /users/login:
+    post:
+      description: Logs in as user
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      - in: query
+        name: mail
+        schema: 
+          $ref: '#/components/schemas/User/properties/mail'
+      - in: query
+        name: password
+        required: true
+        schema: 
+          $ref: '#/components/schemas/User/properties/password'
+        schema: 
+          anyOf:
+            - username
+            - mail
+      responses:
+        '200':
+          description: Your are logged as user !
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Either the username/mail does not exist or the password does not correspond.
+
+
+
+  /users/showfriends:
+    post:
+      description: Swhows the friends of a user
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: List of friendships
+                  users:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/User'
+        '400':
+          description: Did not find a user with this username
+
+
+  /users/pendingfriends:
+    post:
+      description: Swhows the pending invitations of a user
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: List of friendships to accept or refuse
+                  users:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/User'
+        '400':
+          description: Did not find a user with this username
+
+
+  /users/befriend:
+    post:
+      description: Swhows the pending invitations of a user
+      parameters:
+      - in: query
+        name: myusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      - in: query
+        name: friendusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: Your invitaion as been sent Or your invitation has been accepted.
+                  users:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/Friend'
+        '400':
+          description: Did not find a user with your / your friend's username Or you are already friend of yourself Or your are already friends 
+
+
+  /users/unfriend:
+    post:
+      description: Swhows the pending invitations of a user
+      parameters:
+      - in: query
+        name: myusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      - in: query
+        name: otherusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: The invitation has been canceled Or the invitation you have received has been refused Or the frienship is finished.
+                  users:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/Friend'
+        '400':
+          description: Did not find a user with your / the other username Or there are no invitation between both of you 
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          example: Lilou
+          # pattern: /^[a-zA-Z0-9._\-!¡?¿$&@]+$/
+          # yml does not support specific patterns
+        password:
+          type: string
+        mail:
+          type: string
+          example: 'user@example.com'
+        played_matches: 
+          type: integer
+        won_matches: 
+          type: integer
+        max_score: 
+          type: integer
+        total_score:
+          type: integer
+        status: 
+          type: string
+          enum: ['OFFLINE', 'ONLINE', 'PLAYING']  
+
+    Friend:
+      type: object
+      properties:
+        frienderid:
+          type: integer
+        befriendedid:
+          type: integer
+        status:
+          enum: ['PENDING', 'FRENS']
