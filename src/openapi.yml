@@ -290,6 +290,183 @@ paths:
           description: Did not find a user with this username
 
 
+# Players part 
+
+  /players/:
+    get:
+      description: Display the list of the players in the database
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Player'
+        '400':
+          description: Bad Request
+
+  /players/:id: 
+    get:
+      description: Display the player of id {id}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+        '400':
+          description: No player found with this id
+  
+  /players/meingame/:userid: 
+    get:
+      description: Display the player of id {id}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: Here is your player in the current game 
+                  top_card:
+                    $ref: '#/components/schemas/Player'
+        '400':
+          description: Could not find a player corresponding to your user id in any current game
+
+
+  /players/invite:
+    post:
+      description: Invites a user to join a game
+      parameters:
+      - in: query
+        name: myusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      - in: query
+        name: otherusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: You have invited {otherusername} to play with you !
+                  new_player:
+                    $ref: '#/components/schemas/Player'
+        '400':
+          description: We did not find a User with {myusername} / You are not part of any game but somebody invited you to one / You are not part of any game / Did not find a User with the name {otherusernam} / You are not friend but you can invite it to be friend befor hx to enter to your game / The other user is already playing
+
+
+  /players/invitations:
+    post:
+      description: Invites a user to join a game
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: Friends invited to your current game / You are invited to the game with
+                  other_players:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Player'
+        '400':
+          description: We did not find a User with {username} 
+
+  /players/accept:
+    post:
+      description: Accepts the invitation of a game
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      - in: query
+        name: gameid
+        tye: integer
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: You have accepted the invitation of the game of id {gameid}
+                  player:
+                    $ref: '#/components/schemas/Player'
+        '400':
+          description: We did not find a User with {username} / We did not find a game of id {gameid} / You are already playing in the game {current game id} / You have already participated to the game of id {gameid} and it is over / You are already waiting for the game to start / Game is already full
+
+
+  /players/quit:
+    post:
+      description: Quits a game
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      - in: query
+        name: gameid
+        tye: integer
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: As you were waiting to go into the game, you are now out / You have refused the invitation of the game of id {gameid}
+        '400':
+          description: We did not find a User with {username} / We did not find a game of id {gameid} / You have already participated to the game of id {gameid} and it is over / You are currently playing, if you want to check out, go to /ingame
+
+  /players/begin:
+    post:
+      description: Invites a user to join a game
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      - in: query
+        name: gameid
+        tye: integer
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: The game has started 
+                  players:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/Player'
+        '400':
+          description: We did not find a User with {username} / We did not find a game of id {gameid} / You have already participated to the game of id {gameid} and it is over / You are already playing in the game of id {gameid} / Ypu have to accept the invitation of the game {gameid} / You are not owner of the game, you have to wait / This game is played between 2 and 4 players, needs to wait for more
+
+
 components:
   schemas:
     User:
