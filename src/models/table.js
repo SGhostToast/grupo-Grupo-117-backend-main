@@ -23,8 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     ownerid: DataTypes.INTEGER,
     clockwise: DataTypes.BOOLEAN,
     turn: DataTypes.INTEGER,
-    // insideid: DataTypes.INTEGER,
-    // winner: DataTypes.STRING,
+    color: DataTypes.ENUM('RED', 'YELLOW', 'BLUE', 'GREEN'),
     date: DataTypes.DATE
   }, {
     sequelize,

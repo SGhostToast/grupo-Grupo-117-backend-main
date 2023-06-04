@@ -22,13 +22,9 @@ module.exports = {
         type: Sequelize.INTEGER,
         defaultValue: 0
       },
-      // insideid: {
-      //   type: Sequelize.INTEGER,
-      //   defaultValue: 0
-      // },
-      // winner: {
-      //   type: Sequelize.STRING
-      // },
+      color: {
+        type: Sequelize.ENUM('RED', 'YELLOW', 'BLUE', 'GREEN')
+      },
       date: {
         type: Sequelize.DATE,
         defaultValue: new Date()
