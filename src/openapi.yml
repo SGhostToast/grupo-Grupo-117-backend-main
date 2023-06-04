@@ -1,0 +1,699 @@
+openapi: '3.0.2'
+info:
+  title: Uno Online
+  version: '1.0'
+servers:
+  - url: https://localhost:3000
+
+paths:
+# users based
+  /users/:
+    get:
+      description: Display the list of the users in the database
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: Bad Request
+    
+  /users/:id:
+    get:
+      description: Display the information of the user of this id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Dis not find a user with this idea.
+
+
+  /users/signup:
+    post:
+      description: Creates a user
+      parameters:
+      - in: query
+        name: username
+        required: true
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      - in: query
+        name: password
+        required: true
+        schema: 
+          $ref: '#/components/schemas/User/properties/password'
+      - in: query
+        name: mail
+        required: true
+        schema: 
+          type: string
+          $ref: '#/components/schemas/User/properties/mail'
+      responses:
+        '201':
+          description: The user has been created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: The user could not be created
+
+
+  /users/login:
+    post:
+      description: Logs in as user
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+      - in: query
+        name: mail
+        schema: 
+          $ref: '#/components/schemas/User/properties/mail'
+      - in: query
+        name: password
+        required: true
+        schema: 
+          $ref: '#/components/schemas/User/properties/password'
+        schema: 
+          anyOf:
+            - username
+            - mail
+      responses:
+        '200':
+          description: Your are logged as user !
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Either the username/mail does not exist or the password does not correspond.
+
+
+
+  /users/showfriends:
+    post:
+      description: Swhows the friends of a user
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: List of friendships
+                  users:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/User'
+        '400':
+          description: Did not find a user with this username
+
+
+  /users/pendingfriends:
+    post:
+      description: Swhows the pending invitations a user recieved
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: List of friendships to accept or refuse
+                  users:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/User'
+        '400':
+          description: Did not find a user with this username
+
+
+  /users/pendingrequests:
+    post:
+      description: Swhows the pending invitations a user sent
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: List of pending invitations you have sent
+                  users:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/User'
+        '400':
+          description: Did not find a user with this username
+
+  /users/befriend:
+    post:
+      description: Swhows the pending invitations of a user
+      parameters:
+      - in: query
+        name: myusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+        required: true
+      - in: query
+        name: friendusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: Your invitaion as been sent Or your invitation has been accepted.
+                  users:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/Friend'
+        '400':
+          description: Did not find a user with your / your friend's username Or you are already friend of yourself Or your are already friends 
+
+
+  /users/unfriend:
+    post:
+      description: Swhows the pending invitations of a user
+      parameters:
+      - in: query
+        name: myusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+        required: true
+      - in: query
+        name: otherusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: The invitation has been canceled Or the invitation you have received has been refused Or the frienship is finished.
+                  users:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/Friend'
+        '400':
+          description: Did not find a user with your / the other username Or there are no invitation between both of you 
+
+# Tables based
+  /tables/:
+    get:
+      description: Display the list of the tables in the database
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Table'
+        '400':
+          description: Bad Request
+
+  /tables/:id: 
+    get:
+      description: Display the table of id {id}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+        '400':
+          description: No table found with this id
+
+
+  /tables/create:
+    post:
+      description: Crate a table and a player for the entered user
+      parameters:
+      - in: query
+        name: myusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+        required: true
+      - in: query
+        name: gamename
+        schema: 
+          type: string
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: A game has been created. Invite your friends to join you !
+                  table:
+                    $ref: '#/components/schemas/Table'
+                  player:
+                    $ref: '#/components/schemas/Player'
+        '400':
+          description: Did not find a user with this username
+
+
+# Players part 
+
+  /players/:
+    get:
+      description: Display the list of the players in the database
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Player'
+        '400':
+          description: Bad Request
+
+  /players/:id: 
+    get:
+      description: Display the player of id {id}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+        '400':
+          description: No player found with this id
+  
+  /players/meingame/:userid: 
+    get:
+      description: Display the player of id {id}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: Here is your player in the current game 
+                  top_card:
+                    $ref: '#/components/schemas/Player'
+        '400':
+          description: Could not find a player corresponding to your user id in any current game
+
+
+  /players/invite:
+    post:
+      description: Invites a user to join a game
+      parameters:
+      - in: query
+        name: myusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+        required: true
+      - in: query
+        name: otherusername
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: You have invited {otherusername} to play with you !
+                  new_player:
+                    $ref: '#/components/schemas/Player'
+        '400':
+          description: We did not find a User with {myusername} / You are not part of any game but somebody invited you to one / You are not part of any game / Did not find a User with the name {otherusernam} / You are not friend but you can invite it to be friend befor hx to enter to your game / The other user is already playing
+
+
+  /players/invitations:
+    post:
+      description: Invites a user to join a game
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: Friends invited to your current game / You are invited to the game with
+                  other_players:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Player'
+        '400':
+          description: We did not find a User with {username} 
+
+  /players/accept:
+    post:
+      description: Accepts the invitation of a game
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+        required: true
+      - in: query
+        name: gameid
+        type: integer
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: You have accepted the invitation of the game of id {gameid}
+                  player:
+                    $ref: '#/components/schemas/Player'
+        '400':
+          description: We did not find a User with {username} / We did not find a game of id {gameid} / You are already playing in the game {current game id} / You have already participated to the game of id {gameid} and it is over / You are already waiting for the game to start / Game is already full
+
+
+  /players/quit:
+    post:
+      description: Quits a game
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+        required: true
+      - in: query
+        name: gameid
+        type: integer
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: As you were waiting to go into the game, you are now out / You have refused the invitation of the game of id {gameid}
+        '400':
+          description: We did not find a User with {username} / We did not find a game of id {gameid} / You have already participated to the game of id {gameid} and it is over / You are currently playing, if you want to check out, go to /ingame
+
+  /players/begin:
+    post:
+      description: Invites a user to join a game
+      parameters:
+      - in: query
+        name: username
+        schema: 
+          $ref: '#/components/schemas/User/properties/username'
+        required: true
+      - in: query
+        name: gameid
+        type: integer
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: The game has started 
+                  players:
+                    type: array 
+                    items:
+                      $ref: '#/components/schemas/Player'
+        '400':
+          description: We did not find a User with {username} / We did not find a game of id {gameid} / You have already participated to the game of id {gameid} and it is over / You are already playing in the game of id {gameid} / Ypu have to accept the invitation of the game {gameid} / You are not owner of the game, you have to wait / This game is played between 2 and 4 players, needs to wait for more
+
+
+# In game 
+
+  /ingame/card/:tableid: 
+    get:
+      description: Display the first card of the table of id {tableid}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: Facing card on the table
+                  top_card:
+                    $ref: '#/components/schemas/Maze'
+        '400':
+          description: No found a table with id {tableid}
+  
+
+  /ingame/turn/:tableid: 
+    get:
+      description: Display the player who has to play
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: It is the turn of 
+                  turn:
+                    $ref: '#/components/schemas/Player'
+        '400':
+          description: No found a table with id {tableid}
+
+
+  /ingame/hand/:playerid: 
+    get:
+      description: Display the hand of the player of id {playerid}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: Hand of the player 
+                  hand:
+                    $ref: '#/components/schemas/Maze'
+        '400':
+          description: No found a player with id {playerid} / The player is no pat of this game
+
+
+  /ingame/take:
+    post:
+      description: Takes a card
+      parameters:
+      - in: query
+        name: playerid
+        type: integer
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: You have taken the card of the common maze
+                  card:
+                    $ref: '#/components/schemas/Maze'
+                  descrpition:
+                    $ref: '#/components/schemas/Card'  
+        '400':
+          description: We did not find a User with {username} / You can only take a card when it's your turn / The game you are in is not currently playing
+
+
+  /ingame/play:
+    post:
+      description: Plays a card
+      parameters:
+      - in: query
+        name: playerid
+        type: integer
+        required: true
+      - in: query
+        name: cardorder
+        type: integer
+        example: id of the card in your hand you want to play
+        required: true
+      - in: query
+        name: color
+        type: integer
+        example: color in which yoou will want to change the game
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: You have played the card of orden {ordenid} / And you have won !
+                  card:
+                    $ref: '#/components/schemas/Maze'
+                  descrpition:
+                    $ref: '#/components/schemas/Card'  
+        '400':
+          description: We did not find a User with {username} / The game you are in is not currently playing / You can only play when it's your turn / This card is not in your game / You can't play this card because it is not the right color/symbol
+
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        userid:
+          type: integer
+        username:
+          type: string
+          example: Lilou
+          # pattern: /^[a-zA-Z0-9._\-!¡?¿$&@]+$/
+          # yml does not support specific patterns
+        password:
+          type: string
+        mail:
+          type: string
+          example: 'user@example.com'
+        played_matches: 
+          type: integer
+        won_matches: 
+          type: integer
+        max_score: 
+          type: integer
+        total_score:
+          type: integer
+        status: 
+          type: string
+          enum: ['OFFLINE', 'ONLINE', 'PLAYING']  
+
+    Friend:
+      type: object
+      properties:
+        fiendid:
+          type: integer
+        frienderid:
+          type: integer
+        befriendedid:
+          type: integer
+        status:
+          enum: ['PENDING', 'FRENS']
+
+    Player:
+      type: object
+      properties:
+        palyerid:
+          type: integer
+        name:
+          type: string
+        userid:
+          type: integer
+        gameid:
+          type: integer
+        score:
+          type: integer
+        insideid:
+          type: integer
+        status:
+          enum: ['PENDING', 'READY', 'PLAYING', 'WINNER', 'LOSER']
+
+    Table:
+      type: object
+      properties:
+        tableid:
+          type: integer
+        ownerid:
+          type: integer
+        clockwise:
+          type: boolean
+        turn:
+          type: integer
+        color:
+          enum: ['RED', 'YELLOW', 'BLUE', 'GREEN']
+        date:
+          type: date
+    
+    Maze:
+      type: object
+      properties:
+        gameid:
+          type: integer
+        cardid:
+          type: integer
+        holderid:
+          type: integer
+        order:
+          type: integer
+
+    Card:
+      type: object
+      properties:
+        color:
+          enum: ['RED', 'YELLOW', 'BLUE', 'GREEN', 'MULTI']
+        symbol:
+          enum: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'drawTwo', 'reverse', 'skip', 'wild', 'wildDraw4']
