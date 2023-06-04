@@ -108,6 +108,7 @@ paths:
         name: username
         schema: 
           $ref: '#/components/schemas/User/properties/username'
+        required: true
       responses:
         '201':
           content:
@@ -133,6 +134,7 @@ paths:
         name: username
         schema: 
           $ref: '#/components/schemas/User/properties/username'
+        required: true
       responses:
         '201':
           content:
@@ -158,6 +160,7 @@ paths:
         name: username
         schema: 
           $ref: '#/components/schemas/User/properties/username'
+        required: true
       responses:
         '201':
           content:
@@ -182,10 +185,12 @@ paths:
         name: myusername
         schema: 
           $ref: '#/components/schemas/User/properties/username'
+        required: true
       - in: query
         name: friendusername
         schema: 
           $ref: '#/components/schemas/User/properties/username'
+        required: true
       responses:
         '201':
           content:
@@ -211,10 +216,12 @@ paths:
         name: myusername
         schema: 
           $ref: '#/components/schemas/User/properties/username'
+        required: true
       - in: query
         name: otherusername
         schema: 
           $ref: '#/components/schemas/User/properties/username'
+        required: true
       responses:
         '201':
           content:
@@ -269,10 +276,12 @@ paths:
         name: myusername
         schema: 
           $ref: '#/components/schemas/User/properties/username'
+        required: true
       - in: query
         name: gamename
         schema: 
           type: string
+        required: true
       responses:
         '201':
           content:
@@ -347,10 +356,12 @@ paths:
         name: myusername
         schema: 
           $ref: '#/components/schemas/User/properties/username'
+        required: true
       - in: query
         name: otherusername
         schema: 
           $ref: '#/components/schemas/User/properties/username'
+        required: true
       responses:
         '201':
           content:
@@ -374,6 +385,7 @@ paths:
         name: username
         schema: 
           $ref: '#/components/schemas/User/properties/username'
+        required: true
       responses:
         '201':
           content:
@@ -398,9 +410,11 @@ paths:
         name: username
         schema: 
           $ref: '#/components/schemas/User/properties/username'
+        required: true
       - in: query
         name: gameid
-        tye: integer
+        type: integer
+        required: true
       responses:
         '201':
           content:
@@ -424,9 +438,11 @@ paths:
         name: username
         schema: 
           $ref: '#/components/schemas/User/properties/username'
+        required: true
       - in: query
         name: gameid
-        tye: integer
+        type: integer
+        required: true
       responses:
         '201':
           content:
@@ -447,9 +463,11 @@ paths:
         name: username
         schema: 
           $ref: '#/components/schemas/User/properties/username'
+        required: true
       - in: query
         name: gameid
-        tye: integer
+        type: integer
+        required: true
       responses:
         '201':
           content:
@@ -465,6 +483,124 @@ paths:
                       $ref: '#/components/schemas/Player'
         '400':
           description: We did not find a User with {username} / We did not find a game of id {gameid} / You have already participated to the game of id {gameid} and it is over / You are already playing in the game of id {gameid} / Ypu have to accept the invitation of the game {gameid} / You are not owner of the game, you have to wait / This game is played between 2 and 4 players, needs to wait for more
+
+
+# In game 
+
+  /ingame/card/:tableid: 
+    get:
+      description: Display the first card of the table of id {tableid}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: Facing card on the table
+                  top_card:
+                    $ref: '#/components/schemas/Maze'
+        '400':
+          description: No found a table with id {tableid}
+  
+
+  /ingame/turn/:tableid: 
+    get:
+      description: Display the player who has to play
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: It is the turn of 
+                  turn:
+                    $ref: '#/components/schemas/Player'
+        '400':
+          description: No found a table with id {tableid}
+
+
+  /ingame/hand/:playerid: 
+    get:
+      description: Display the hand of the player of id {playerid}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: Hand of the player 
+                  hand:
+                    $ref: '#/components/schemas/Maze'
+        '400':
+          description: No found a player with id {playerid} / The player is no pat of this game
+
+
+  /ingame/take:
+    post:
+      description: Takes a card
+      parameters:
+      - in: query
+        name: playerid
+        type: integer
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: You have taken the card of the common maze
+                  card:
+                    $ref: '#/components/schemas/Maze'
+                  descrpition:
+                    $ref: '#/components/schemas/Card'  
+        '400':
+          description: We did not find a User with {username} / You can only take a card when it's your turn / The game you are in is not currently playing
+
+
+  /ingame/play:
+    post:
+      description: Plays a card
+      parameters:
+      - in: query
+        name: playerid
+        type: integer
+        required: true
+      - in: query
+        name: cardorder
+        type: integer
+        example: id of the card in your hand you want to play
+        required: true
+      - in: query
+        name: color
+        type: integer
+        example: color in which yoou will want to change the game
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg: 
+                    type: string
+                    example: You have played the card of orden {ordenid} / And you have won !
+                  card:
+                    $ref: '#/components/schemas/Maze'
+                  descrpition:
+                    $ref: '#/components/schemas/Card'  
+        '400':
+          description: We did not find a User with {username} / The game you are in is not currently playing / You can only play when it's your turn / This card is not in your game / You can't play this card because it is not the right color/symbol
 
 
 components:
@@ -541,3 +677,23 @@ components:
           enum: ['RED', 'YELLOW', 'BLUE', 'GREEN']
         date:
           type: date
+    
+    Maze:
+      type: object
+      properties:
+        gameid:
+          type: integer
+        cardid:
+          type: integer
+        holderid:
+          type: integer
+        order:
+          type: integer
+
+    Card:
+      type: object
+      properties:
+        color:
+          enum: ['RED', 'YELLOW', 'BLUE', 'GREEN', 'MULTI']
+        symbol:
+          enum: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'drawTwo', 'reverse', 'skip', 'wild', 'wildDraw4']
