@@ -1,6 +1,7 @@
 const koa = require("koa");
 const koaLogger = require("koa-logger");
 const { koaBody } = require("koa-body");
+const cors = require("@koa/cors");
 const router = require("./routes.js");
 const orm = require("./models/index.js");
 const json = require('koa-json');
@@ -15,6 +16,8 @@ app.use(json()); // just to have a beautiful display of json files when verifyin
 
 app.context.orm = orm;
 
+// Cors para poder accede desde el frontend
+app.use(cors());
 app.use(koaLogger());
 app.use(koaBody());
 

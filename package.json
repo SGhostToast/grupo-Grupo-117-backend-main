@@ -7,6 +7,7 @@
   "author": "LilianBernot <lilian.bernot@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@koa/cors": "^4.0.0",
     "dotenv": "^16.1.3",
     "koa": "^2.14.2",
     "koa-body": "^6.0.1",
@@ -32,8 +33,8 @@
     "unpotall": "sequelize-cli db:seed:undo:all",
     "migrate": "sequelize-cli db:migrate",
     "unmigrate": "sequelize-cli db:migrate:undo",
-    "build":"sequelize-cli db:migrate && sequelize-cli db:seed:all",
-    "destroy":"sequelize-cli db:migrate:undo:all"
+    "build": "sequelize-cli db:migrate && sequelize-cli db:seed:all",
+    "destroy": "sequelize-cli db:migrate:undo:all"
   },
   "devDependencies": {
     "eslint": "^8.41.0"
