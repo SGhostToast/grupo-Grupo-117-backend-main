@@ -1979,6 +1979,11 @@ sequelize-cli@^6.6.0:
     umzug "^2.3.0"
     yargs "^16.2.0"
 
+sequelize-noupdate-attributes@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/sequelize-noupdate-attributes/-/sequelize-noupdate-attributes-1.0.0.tgz#70ab724563742b2c6fbadc507c91c01041b5fb38"
+  integrity sha512-nBmSvzQuhi318QZ7M4gY3qBGpV1hbYepox99GDpm8M2kBgyfMaaNcMg2B9T62yg5Yct8BKW+WDOpx0Je9+LKFg==
+
 sequelize-pool@^7.1.0:
   version "7.1.0"
   resolved "https://registry.npmjs.org/sequelize-pool/-/sequelize-pool-7.1.0.tgz"
