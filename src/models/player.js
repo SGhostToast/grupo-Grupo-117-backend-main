@@ -1,7 +1,5 @@
 'use strict';
 
-const User = require('./user');
-
 const {
   Model
 } = require('sequelize');
@@ -26,19 +24,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     userid: {
       type: DataTypes.INTEGER,
-      validate: {
-        isImmutable() {
-          throw new Error('El valor del atributo "cardid" no puede ser modificado');
-        }
-      }
+      // https://www.npmjs.com/package/sequelize-noupdate-attributes
+      noUpdate: true
     },
     gameid: {
       type: DataTypes.INTEGER,
-      validate: {
-        isImmutable() {
-          throw new Error('El valor del atributo "cardid" no puede ser modificado');
-        }
-      }
+      noUpdate: true
     },
     score: DataTypes.INTEGER,
     insideid: DataTypes.INTEGER,
@@ -48,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
     hooks: {
       afterCreate: (player) => {
         if (!player.name) {
-          return User.findByPk(player.userid)
+          return sequelize.models.User.findByPk(player.userid)
             .then(user => {
               player.name = user.username;
               return player.save();

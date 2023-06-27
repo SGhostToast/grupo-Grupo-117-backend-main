@@ -33,7 +33,7 @@ const spec = yamljs.load(__dirname + "/openapi.yml");
 router.use(koaSwagger({ swaggerOptions: { spec } }));
 
 // example 2 using more explicit .get()
-router.get("/test", (ctx, next) => {
+router.get("/test", (ctx) => {
   ctx.response.body = "Hello world!";
 });
 

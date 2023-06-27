@@ -7,7 +7,9 @@ router.post("tables.create", "/create", async(ctx) => {
     if (ctx.request.body.username) {
       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username}});
       if (user) {
-        const table = await ctx.orm.Table.create({});
+        const table = await ctx.orm.Table.create({
+          ownerid: user.id
+        });
         let playerdata = {
           userid: user.id,
           gameid: table.id,
@@ -16,7 +18,9 @@ router.post("tables.create", "/create", async(ctx) => {
         if (ctx.request.body.gamename) {
           playerdata.name = ctx.request.body.gamename
         }
+        console.log('creating player');
         const player = await ctx.orm.Player.create(playerdata);
+        console.log('player created');
         ctx.body = {
           msg: `Partida creada por jugador ${player.name}. ¡Invita a tus amistades a jugar!`,
           table: table,

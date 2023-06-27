@@ -7,23 +7,11 @@ module.exports = (sequelize, DataTypes) => {
   Friend.init({
     frienderid: {
       type: DataTypes.INTEGER,
-      validate: {
-        isImmutable() {
-          if (!this.isNewRecord) {
-            throw new Error('El valor del atributo "frienderid" no puede ser modificado');
-          }
-        }
-      }
+      noUpdate: true
     },
     befriendedid: {
       type: DataTypes.INTEGER,
-      validate: {
-        isImmutable() {
-          if (!this.isNewRecord) {
-            throw new Error('El valor del atributo "befriendedid" no puede ser modificado');
-          }
-        }
-      }
+      noUpdate: true
     },
     status: DataTypes.ENUM('PENDING', 'FRENS')
   }, {

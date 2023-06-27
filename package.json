@@ -20,6 +20,7 @@
     "postgresql": "^0.0.1",
     "sequelize": "^6.32.0",
     "sequelize-cli": "^6.6.0",
+    "sequelize-noupdate-attributes": "^1.0.0",
     "yamljs": "^0.3.0"
   },
   "scripts": {

@@ -5,6 +5,7 @@ const router = new Router();
 
 router.post("players.create", "/invite", async(ctx) => {
   try {
+    console.log(`${ctx.request.body.myusername}, ${ctx.request.body.otherusername}`)
     if (ctx.request.body.myusername && ctx.request.body.otherusername) {
       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.myusername}});
       if (user) {

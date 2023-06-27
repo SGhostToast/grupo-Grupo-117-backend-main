@@ -19,19 +19,11 @@ module.exports = (sequelize, DataTypes) => {
   Card.init({
     color: {
       type: DataTypes.ENUM('RED', 'YELLOW', 'BLUE', 'GREEN', 'MULTI'),
-      validate: {
-        isImmutable() {
-          throw new Error('El valor del atributo "color" no puede ser modificado');
-        }
-      }
+      noUpdate: true
     },
     symbol: {
       type: DataTypes.ENUM('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'drawTwo', 'reverse', 'skip', 'wild', 'wildDraw4'),
-      validate: {
-        isImmutable() {
-          throw new Error('El valor del atributo "symbol" no puede ser modificado');
-        }
-      }
+      noUpdate: true
     }
   }, {
     sequelize,
