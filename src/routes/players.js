@@ -244,6 +244,8 @@ router.post("players.begin", "/begin", async(ctx) => {
               shuffled_players.push(ordered_players.splice(i, 1)[0]);
             }
             let i = 2;
+            game.turn = i;
+            game.save();
             for (const plyer of shuffled_players) {
               plyer.status = 'PLAYING';
               plyer.insideid = i;
