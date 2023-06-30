@@ -52,9 +52,8 @@ router.get("tables.list", "/", async(ctx) => {
 
 router.get("tables.show", "/:id", async(ctx) => {
   try {
-    // const user = await ctx.orm.User.findByPk(ctx.params.id);
-    const tables = await ctx.orm.Tables.findOne({where:{id:ctx.params.id}});
-    ctx.body = tables;
+    const table = await ctx.orm.Table.findByPk(ctx.params.id);
+    ctx.body = table;
     ctx.status = 200;
   } catch(error) {
     ctx.body = error;
