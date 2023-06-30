@@ -1,6 +1,7 @@
 const Router = require('koa-router');
 var jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const bcrypt = require('bcrypt');
 
 dotenv.config();
 
@@ -15,9 +16,13 @@ router.post("authentication.signup", "/signup", async (ctx) => {
         return;
     }
     try {
+        const saltRounds = 10;
+
+        const hashPassword = await bcrypt.hash(authInfo.password, saltRounds);
+
         user = await ctx.orm.User.create({
             username: authInfo.username,
-            password: authInfo.password,
+            password: hashPassword,
             mail: authInfo.email
         })
     } catch (error) {
@@ -48,7 +53,8 @@ router.post("authentication.login", "/login", async (ctx) => {
         ctx.status = 400;
         return;
     }
-    if (user.password == authInfo.password) {
+    
+    if (await bcrypt.compare(authInfo.password, user.password)) {
         ctx.body = {
             username: user.username,
             email: user.mail,
