@@ -48,10 +48,10 @@ module.exports = (sequelize, DataTypes) => {
         return 1;
       },
       beforeUpdate: (player) => {
-        if (player.insideid) {
+        if (player.previous('insideid')) {
           throw new Error('"insideid" ya ha sido inicializado y no permite modificación.');
         }
-        else if (player.status == 'WINNER' || player.status == 'LOSER') {
+        else if (player.previous('status') == 'WINNER' || player.previous('status') == 'LOSER') {
           throw new Error('El "status" fue determinado al final del juego y no permite modificación.');
         }
       }

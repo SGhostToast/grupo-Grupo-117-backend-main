@@ -135,7 +135,7 @@ router.post("players.accept", "/accept", async(ctx) => {
           }
           else {
             let all_players = await ctx.orm.Player.findAll({where:{gameid:ctx.request.body.gameid, status: 'READY'}});
-            if (all_players.lenght == 4) {
+            if (all_players.length == 4) {
               throw Error(`El juego de id ${ctx.request.body.gameid} llenó su máxima capacidad (4).`);
             }
             player.status = 'READY';
@@ -235,22 +235,22 @@ router.post("players.begin", "/begin", async(ctx) => {
               throw Error(`No eres dueño del juego de id ${ctx.request.body.gameid}. Si quieres que comienze la partida, pidele al dueño que la comience.`);
             }
             let ordered_players = await ctx.orm.Player.findAll({where:{gameid:ctx.request.body.gameid, status: 'READY'}});
-            if (ordered_players.lenght < 2) {
+            if (ordered_players.length < 2) {
               throw Error(`Este juego es de 2 a 4 jugadores, ¡Invita a tus amistades para jugar!`);
             }
             let shuffled_players = [];
-            while (ordered_players.lenght > 0) {
-              const i = Math.floor(Math.random() * (ordered_players.lenght - 1));
+            while (ordered_players.length > 0) {
+              const i = Math.floor(Math.random() * (ordered_players.length - 1));
               shuffled_players.push(ordered_players.splice(i, 1)[0]);
             }
             let i = 2;
             for (const plyer of shuffled_players) {
               plyer.status = 'PLAYING';
               plyer.insideid = i;
-              plyer.save();
+              await plyer.save();
               i++;
             }
-            createGameMaze(ctx, game.id, shuffled_players);
+            await createGameMaze(ctx, game.id, shuffled_players);
             ctx.body = {
               msg: `¡Ha comenzado el juego de id ${ctx.request.body.gameid}!`,
               players: shuffled_players
@@ -333,8 +333,8 @@ async function createGameMaze(ctx, gameid, players) {
   }
 
   let shuffled_maze = [];
-  while (maze.lenght > 0) {
-    const i = Math.floor(Math.random() * (maze.lenght - 1));
+  while (maze.length > 0) {
+    const i = Math.floor(Math.random() * (maze.length - 1));
     shuffled_maze.push(maze.splice(i, 1)[0]);
   }
 
@@ -347,7 +347,7 @@ async function createGameMaze(ctx, gameid, players) {
     }
   }
 
-  for (let i = 0; i < shuffled_maze.lenght; i++) {
+  for (let i = 0; i < shuffled_maze.length; i++) {
     if (i == (shuffled_maze.length - 1)) {
       // default holderid = 0 => Mazo para sacar.
       // holderid = 1 => Mazo descarte.

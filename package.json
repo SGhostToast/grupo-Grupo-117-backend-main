@@ -35,7 +35,8 @@
     "migrate": "sequelize-cli db:migrate",
     "unmigrate": "sequelize-cli db:migrate:undo",
     "build": "sequelize-cli db:migrate && sequelize-cli db:seed:all",
-    "destroy": "sequelize-cli db:migrate:undo:all"
+    "destroy": "sequelize-cli db:migrate:undo:all",
+    "reset":"sequelize-cli db:migrate:undo:all && sequelize-cli db:migrate && sequelize-cli db:seed:all"
   },
   "devDependencies": {
     "eslint": "^8.41.0"
