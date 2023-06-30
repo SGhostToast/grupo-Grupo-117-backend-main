@@ -83,10 +83,10 @@ router.post("game.playcard", "/play", async(ctx) => {
           if (!ctx.request.body.color) {
             throw Error('Se necesita el color al que quieras cambiar como "color" al jugar una carta "wild" o "wildDraw4".')
           }
-          play_type = await playCard(ctx, player, table, all_players, ctx.request.body.cardorder, ctx.request.body.color);
+          play_type = await playCard(ctx, player, table, all_players, ctx.request.body.cardorder, card_type, ctx.request.body.color);
         }
         else {
-          play_type = await playCard(ctx, player, table, all_players, ctx.request.body.cardorder, null);
+          play_type = await playCard(ctx, player, table, all_players, ctx.request.body.cardorder, card_type, null);
         }
         let body;
         if (play_type == 'standard') {
@@ -187,8 +187,7 @@ router.get("game.lookathand", "/hand/:playerid", async(ctx) => {
   }
 })
 
-async function playCard(ctx, player, table, all_players, card, card_type, color) {
-  const cardorder = card.order;
+async function playCard(ctx, player, table, all_players, cardorder, card_type, color) {
   const hand = await ctx.orm.Maze.findAll({
     where: {gameid:player.gameid, holderid:player.insideid},
     order: [['order', 'DESC']],
