@@ -3,20 +3,13 @@ const Router = require("koa-router");
 const router = new Router();
 
 router.post("tables.create", "/create", async(ctx) => {
-  // console.log("creating game")
-  // console.log(ctx.request)
   try {
-    console.log("--- in the try")
     if (ctx.request.body.username) {
-      console.log("--- in the if")
       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username}});
       if (user) {
-        console.log("--- user exists")
         const table = await ctx.orm.Table.create({
-          ownerid: user.id,
-          color:'RED'
+          ownerid: user.id
         });
-        console.log("--- table created")
         let playerdata = {
           userid: user.id,
           gameid: table.id,
@@ -25,9 +18,7 @@ router.post("tables.create", "/create", async(ctx) => {
         if (ctx.request.body.gamename) {
           playerdata.name = ctx.request.body.gamename
         }
-        console.log('--- creating player');
         const player = await ctx.orm.Player.create(playerdata);
-        console.log('--- player created');
         ctx.body = {
           msg: `Partida creada por jugador ${player.name}. ¡Invita a tus amistades a jugar!`,
           table: table,
@@ -43,7 +34,6 @@ router.post("tables.create", "/create", async(ctx) => {
       throw Error('Se necesita entregar al menos tu nombre de usuario como "username" y opcional un nombre de jugador como "gamename".')
     }
   } catch(error) {
-    console.log("in the error")
     ctx.body = {errorMessage: error.message, errorCode: error.code};
     ctx.status = 400;
   }
