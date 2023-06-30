@@ -8,7 +8,9 @@ router.post("tables.create", "/create", async(ctx) => {
       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username}});
       if (user) {
         const table = await ctx.orm.Table.create({
-          ownerid: user.id
+          ownerid: user.id,
+          color:"BLUE"
+// modificacion que no va !!!!
         });
         let playerdata = {
           userid: user.id,
