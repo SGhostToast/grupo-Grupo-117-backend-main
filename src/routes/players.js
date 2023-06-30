@@ -231,7 +231,7 @@ router.post("players.begin", "/begin", async(ctx) => {
           }
           else {
             const game = await ctx.orm.Table.findOne({where:{id:player.gameid}});
-            if (game.ownerid != player.id){
+            if (game.ownerid != user.id){
               throw Error(`No eres dueño del juego de id ${ctx.request.body.gameid}. Si quieres que comienze la partida, pidele al dueño que la comience.`);
             }
             let ordered_players = await ctx.orm.Player.findAll({where:{gameid:ctx.request.body.gameid, status: 'READY'}});

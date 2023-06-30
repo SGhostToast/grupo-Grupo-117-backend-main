@@ -7,6 +7,7 @@ Need to be installed in yarn (yarn add …) :
 - **koa-body** : middleware for the Koa framework that parses and extracts the request body data
 - **koa-router** : routing middleware for the Koa framework that handles HTTP request routing and URL pattern matching
 - **koa-json** : Helps displaying beautiful json objects on a web page. Helps to manually check the endpoints
+- **@koa/cors** : middleware that provides Cross-Origin Resource Sharing (CORS) support. Allows acceding to the backend endpoints from the frontend
 
 ## For the database :
 - **postgresql** : open-source relational database management system that provides data storage, retrieval, and advanced features for managing structured data
