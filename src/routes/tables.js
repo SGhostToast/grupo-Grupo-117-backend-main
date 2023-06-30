@@ -7,9 +7,12 @@ router.post("tables.create", "/create", async(ctx) => {
     if (ctx.request.body.username) {
       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username}});
       if (user) {
-        const existing_player = await ctx.orm.Player.findOne({where:{userid:user.id, status: 'READY'}});
-        if(existing_player){
-          throw Error(`Ya estas READY para en la partida ${existing_player.gameid}.`)
+        const ready_player = await ctx.orm.Player.findOne({where:{userid:user.id, status: 'READY'}});
+        const ingame_player = await ctx.orm.Player.findOne({where:{userid:user.id, status: 'PLAYING'}});
+        if(ready_player){
+          throw Error(`Ya estas READY para en la partida ${ready_player.gameid}.`)
+        } else if(ingame_player){
+          throw Error(`Ya estas PLAYING en la partida ${ingame_player.gameid}.`)
         } else{
           const table = await ctx.orm.Table.create({
             ownerid: user.id,
