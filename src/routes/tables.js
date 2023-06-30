@@ -63,7 +63,7 @@ router.get("tables.show", "/:id", async(ctx) => {
 
 router.get("tables.players", "/:id/players", async(ctx) => {
   try {
-    const players = await ctx.orm.Players.findAll({where:{gameid:ctx.params.id}});
+    const players = await ctx.orm.Player.findAll({where:{gameid:ctx.params.id}});
     ctx.body = players;
     ctx.status = 200;
   } catch(error) {

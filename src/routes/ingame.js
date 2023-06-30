@@ -5,7 +5,7 @@ const router = new Router();
 router.post("game.takecard", "/take", async(ctx) => {
   try {
     if (ctx.request.body.playerid) {
-      const player = await ctx.orm.Player.findOne({where:{id:ctx.params.playerid}});
+      const player = await ctx.orm.Player.findOne({where:{id:ctx.request.body.playerid}});
       if (player) {
         // Mazes get created when a game starts and get destroyed when it ends, so the abscence of a maze indicates the game is not being played
         const grab_card = await ctx.orm.Maze.findOne({
@@ -13,7 +13,7 @@ router.post("game.takecard", "/take", async(ctx) => {
           order: [['order', 'DESC']],
         });
         if (!grab_card) {
-          throw Error(`El juego del perfil de jugador de id ${ctx.params.playerid} no está en curso.`);
+          throw Error(`El juego del perfil de jugador de id ${ctx.request.body.playerid} no está en curso.`);
         }
         const table = await ctx.orm.Table.findOne({where:{id:player.gameid, turn:player.insideid}});
         if (!table) {
@@ -29,7 +29,7 @@ router.post("game.takecard", "/take", async(ctx) => {
         ctx.status = 201;
       }
       else {
-        throw Error(`No se ha encontrado un jugador con id ${ctx.params.playerid}`);
+        throw Error(`No se ha encontrado un jugador con id ${ctx.request.body.playerid}`);
       }
     }
     else {
