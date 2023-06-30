@@ -1,8 +1,18 @@
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
+/* eslint-disable-next-line */
+const pwd_ghosttoast = await bcrypt.hash('ghosttoast.123', saltRounds);
+const pwd_lilianbernot = await bcrypt.hash('lilianbernot.123', saltRounds);
+const pwd_user1 = await bcrypt.hash('user1.123', saltRounds);
+const pwd_user2 = await bcrypt.hash('user2.123', saltRounds);
+
 module.exports = {
-  up: (queryInterface) => queryInterface.bulkInsert('Users', [
+  up: (queryInterface) => 
+  queryInterface.bulkInsert('Users', [
     {
       username: 'ghosttoast',
-      password: 'ghosttoast.123',
+      password: pwd_ghosttoast,
       mail: 'ghosttoast@uc.cl',
       played_matches: 0,
       won_matches: 0,
@@ -13,7 +23,7 @@ module.exports = {
     },
     {
       username: 'lilianbernot',
-      password: 'lilianbernot.123',
+      password: pwd_lilianbernot,
       mail: 'lilianbernot@uc.cl',
       played_matches: 0,
       won_matches: 0,
@@ -24,7 +34,7 @@ module.exports = {
     },
     {
       username: 'user1',
-      password: 'user1.123',
+      password: pwd_user1,
       mail: 'user1@uc.cl',
       played_matches: 0,
       won_matches: 0,
@@ -35,7 +45,7 @@ module.exports = {
     },
     {
       username: 'user2',
-      password: 'user2.123',
+      password: pwd_user2,
       mail: 'user2@uc.cl',
       played_matches: 0,
       won_matches: 0,

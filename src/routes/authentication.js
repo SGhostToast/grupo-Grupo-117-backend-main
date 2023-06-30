@@ -17,7 +17,6 @@ router.post("authentication.signup", "/signup", async (ctx) => {
     }
     try {
         const saltRounds = 10;
-
         const hashPassword = await bcrypt.hash(authInfo.password, saltRounds);
 
         user = await ctx.orm.User.create({
@@ -53,7 +52,7 @@ router.post("authentication.login", "/login", async (ctx) => {
         ctx.status = 400;
         return;
     }
-    
+
     if (await bcrypt.compare(authInfo.password, user.password)) {
         ctx.body = {
             username: user.username,
