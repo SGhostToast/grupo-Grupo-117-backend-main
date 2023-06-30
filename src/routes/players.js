@@ -244,13 +244,17 @@ router.post("players.begin", "/begin", async(ctx) => {
               shuffled_players.push(ordered_players.splice(i, 1)[0]);
             }
             let i = 2;
+            game.turn = i;
+            game.save();
             for (const plyer of shuffled_players) {
               plyer.status = 'PLAYING';
               plyer.insideid = i;
               await plyer.save();
               i++;
             }
-            await createGameMaze(ctx, game.id, shuffled_players);
+            const top_card_id = await createGameMaze(ctx, game.id, shuffled_players);
+            game.color = await ctx.orm.Card.findByPk(top_card_id).color;
+            game.save();
             ctx.body = {
               msg: `¡Ha comenzado el juego de id ${ctx.request.body.gameid}!`,
               players: shuffled_players
@@ -346,19 +350,21 @@ async function createGameMaze(ctx, gameid, players) {
       put_card.save()
     }
   }
-
+  let top_card_id;
   for (let i = 0; i < shuffled_maze.length; i++) {
     if (i == (shuffled_maze.length - 1)) {
       // default holderid = 0 => Mazo para sacar.
       // holderid = 1 => Mazo descarte.
       shuffled_maze[i].order = 0;
       shuffled_maze[i].holderid = 1;
+      top_card_id = shuffled_maze[i].cardid;
     }
     else {
       shuffled_maze[i].order = i;
     }
     shuffled_maze[i].save()
   }
+  return top_card_id;
 }
 
 module.exports = router;
