@@ -7,26 +7,31 @@ router.post("tables.create", "/create", async(ctx) => {
     if (ctx.request.body.username) {
       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username}});
       if (user) {
-        const table = await ctx.orm.Table.create({
-          ownerid: user.id,
-          color:"BLUE"
-// modificacion que no va !!!!
-        });
-        let playerdata = {
-          userid: user.id,
-          gameid: table.id,
-          status: 'READY'
-        };
-        if (ctx.request.body.gamename) {
-          playerdata.name = ctx.request.body.gamename
+        const existing_player = await ctx.orm.Player.findOne({where:{userid:user.id, status: 'READY'}});
+        if(existing_player){
+          throw Error(`Ya estas READY para en la partida ${existing_player.gameid}.`)
+        } else{
+          const table = await ctx.orm.Table.create({
+            ownerid: user.id,
+            color:"BLUE"
+  // modificacion que no va !!!!
+          });
+          let playerdata = {
+            userid: user.id,
+            gameid: table.id,
+            status: 'READY'
+          };
+          if (ctx.request.body.gamename) {
+            playerdata.name = ctx.request.body.gamename
+          }
+          const player = await ctx.orm.Player.create(playerdata);
+          ctx.body = {
+            msg: `Partida creada por jugador ${player.name}. ¡Invita a tus amistades a jugar!`,
+            table: table,
+            player: player
+          };
+          ctx.status = 201;
         }
-        const player = await ctx.orm.Player.create(playerdata);
-        ctx.body = {
-          msg: `Partida creada por jugador ${player.name}. ¡Invita a tus amistades a jugar!`,
-          table: table,
-          player: player
-        };
-        ctx.status = 201;
       }
       else {
         throw Error(`No se encontró tu usuario con username ${ctx.request.body.username}.`)
