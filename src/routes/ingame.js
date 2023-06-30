@@ -67,7 +67,9 @@ router.post("game.playcard", "/play", async(ctx) => {
         if (card_type.symbol == 'wild' || card_type.symbol == 'wildDraw4') {
           wild = true;
         }
-        else if (card_type.symbol != top_card_type.symbol && card_type.color != table.color) {
+        // The table color can only be 'MULTI' if the very first card in the discard maze (at the beginning of the game) is a wild card.
+        // Only in this case can the player play whatever color they want. This is a border case.
+        else if (card_type.symbol != top_card_type.symbol && card_type.color != table.color && table.color != 'MULTI') {
           if (card_type.color != table.color) {
             throw Error(`No puedes jugar tu carta de orden ${ctx.request.body.cardorder} en tu mano ya que esta es de color 
                         ${card_type.color} y el color permitido es ${table.color}`);
