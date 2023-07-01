@@ -83,22 +83,19 @@ router.post("players.showinvitations", "/invitations", async(ctx) => {
       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username}});
       if (user) {
         const insidegame = await ctx.orm.Player.findOne({where:{userid:user.id, status: 'READY'}});
+        const dico = {};
         if (insidegame) {
           const invited_to_your_game = await ctx.orm.Player.findAll({where:{gameid:insidegame.gameid, status: 'PENDING'}});
-          ctx.body = {
-            msg: `Amistades invitadas a tu juego actual:`,
-            invited_to_your_game: invited_to_your_game
-          };
-          ctx.status = 201;
+          dico['msg_you_invited'] = `Amistades invitadas a tu juego actual:`;
+          dico['invited_to_your_game'] = invited_to_your_game;
         }
-        else {
-          const you_were_invited_to = await ctx.orm.Player.findAll({where:{userid:user.id, status: 'PENDING'}});
-          ctx.body = {
-            msg: `Te invitaron a los siguientes juegos:`,
-            you_were_invited_to: you_were_invited_to
-          };
-          ctx.status = 201;
-        }
+
+        const you_were_invited_to = await ctx.orm.Player.findAll({where:{userid:user.id, status: 'PENDING'}});
+        dico['msg_you_were_invited'] = `Te invitaron a los siguientes juegos:`;
+        dico['you_were_invited_to'] = you_were_invited_to;
+        ctx.status = 201;
+
+        ctx.body = dico;
       }
       else {
         throw Error(`No se encontró tu usuario con username ${ctx.request.body.username}.`)
@@ -301,6 +298,24 @@ router.get("players.show", "/:id", async(ctx) => {
   }
 })
 
+router.get("players.show", "/mewaitinggame/:userid", async(ctx) => {
+  try {
+    // const user = await ctx.orm.User.findByPk(ctx.params.id);
+    const player = await ctx.orm.Player.findOne({where:{userid:ctx.params.userid, status:'READY'}});
+    if (!player) {
+      throw Error(`Tu usuario de id ${ctx.params.userid} no se encuentra esperando un juego.`);
+    }
+    ctx.body = {
+      msg: `Tu perfil de jugador en el juego que esperas es:`,
+      player: player,
+    };
+    ctx.status = 200;
+  } catch(error) {
+    ctx.body = {errorMessage: error.message, errorCode: error.code};
+    ctx.status = 400;
+  }
+})
+
 router.get("players.show", "/meingame/:userid", async(ctx) => {
   try {
     // const user = await ctx.orm.User.findByPk(ctx.params.id);
@@ -310,7 +325,7 @@ router.get("players.show", "/meingame/:userid", async(ctx) => {
     }
     ctx.body = {
       msg: `Tu perfil de jugador en el juego actual es:`,
-      top_card: player,
+      player: player,
     };
     ctx.status = 200;
   } catch(error) {
