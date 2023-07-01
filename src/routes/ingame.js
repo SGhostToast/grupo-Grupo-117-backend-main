@@ -6,15 +6,8 @@ const router = new Router();
 router.post("game.takecard", "/take", async(ctx) => {
   try {
     if (ctx.request.body.playerid) {
-      const player = await ctx.orm.Player.findOne({where:{id:ctx.request.body.playerid}});
+      const player = await ctx.orm.Player.findOne({where:{id:ctx.params.playerid}});
       if (player) {
-        // Mazes get created when a game starts and get destroyed when it ends, so the abscence of a maze indicates the game is not being played
-        const grab_card = await ctx.orm.Maze.findOne({
-          where: {gameid:player.gameid, holderid:0}, // holderid = 0 => Pickup maze.
-          order: [['order', 'DESC']],
-        });
-        if (!grab_card) {
-          throw Error(`El juego del perfil de jugador de id ${ctx.request.body.playerid} no está en curso.`);
         if (player.status != 'PLAYING') {
           throw Error(`El juego del perfil de jugador de id ${ctx.params.playerid} no está en curso.`);
         }
@@ -34,7 +27,7 @@ router.post("game.takecard", "/take", async(ctx) => {
         ctx.status = 201;
       }
       else {
-        throw Error(`No se ha encontrado un jugador con id ${ctx.request.body.playerid}`);
+        throw Error(`No se ha encontrado un jugador con id ${ctx.params.playerid}`);
       }
     }
     else {
@@ -62,12 +55,16 @@ router.post("game.playcard", "/play", async(ctx) => {
         if (!play_card) {
           throw Error(`El orden ${ctx.request.body.cardorder} está fuera del rango de tu mano.`);
         }
+        console.log("Finding top_card");
         const top_card = await ctx.orm.Maze.findOne({
           where: {gameid:ctx.request.body.tableid, holderid:1}, // holderid = 1 => Put down maze.
           order: [['order', 'DESC']],
         });
-        const top_card_type = await ctx.orm.card.findOne({where: {id:top_card.cardid}});
-        const card_type = await ctx.orm.card.findOne({where: {id:play_card.cardid}});
+        console.log("top_card found");
+        const top_card_type = await ctx.orm.Card.findOne({where: {id:top_card.cardid}});
+        console.log("top_card_type found");
+        const card_type = await ctx.orm.Card.findOne({where: {id:play_card.cardid}});
+        console.log("card_type found");
         let wild = false;
         if (card_type.symbol == 'wild' || card_type.symbol == 'wildDraw4') {
           wild = true;
@@ -268,8 +265,15 @@ async function playCard(ctx, player, table, all_players, cardorder, card_type, c
     order: [['order', 'DESC']],
   });
 
+  // console.log("Hand", hand);
+
   // Take out card, put it on game
-  const playable_card = hand.splice(cardorder, 1);
+  const playable_maze = hand.splice(cardorder, 1);
+  const playable_cardid = playable_maze[0].dataValues.cardid;
+  console.log("Playable card id : ", playable_cardid);
+
+  const playable_card = await ctx.orm.Card.findOne({where:{id:playable_cardid}});
+
   playable_card.holderid = 0;
   playable_card.order = (top_on_desk.order + 1);
   playable_card.save();
@@ -279,6 +283,7 @@ async function playCard(ctx, player, table, all_players, cardorder, card_type, c
     hand[i].order = i;
     hand[i].save();
   }
+  hand.save();
 
   table.color = card_type.color;
   table.save();
@@ -318,8 +323,8 @@ async function finishTurn(ctx, player, table, all_players, effect, color) {
   else if (effect == 'skip') {
     player_aux_turn = await getNext(table, player_aux_turn, all_players);
   }
-   table.turn = await getNext(table, player_aux_turn, all_players);
-   table.save()
+  table.turn = await getNext(table, player_aux_turn, all_players);
+  table.save()
 return 'standard';
 }
 
@@ -370,9 +375,9 @@ async function reverse(table) {
   table.save();
 }
 
-async function getNext(table,player_aux_turn, all_players) {
+async function getNext(table, player_aux_turn, all_players) {
   if (table.clockwise) {
-    if (player_aux_turn == (all_players.length + 2)){
+    if (player_aux_turn == (all_players.length + 1)){ // change : length = max_index + 1
       return 2;
     }
     else {
@@ -381,7 +386,7 @@ async function getNext(table,player_aux_turn, all_players) {
   }
   else {
     if (player_aux_turn == 2){
-      return (all_players.length + 2);
+      return (all_players.length + 1);
     }
     else {
       return (player_aux_turn - 1);

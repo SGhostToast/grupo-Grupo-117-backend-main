@@ -32,6 +32,10 @@ cards.push({
 });
 
 module.exports = {
-  up: (queryInterface) => queryInterface.bulkInsert('Cards', cards),
-  down: (queryInterface) => queryInterface.bulkDelete('Cards', null, {})
+  up: async (queryInterface) => {
+    await queryInterface.bulkInsert('Cards', cards);
+  },
+  down: async (queryInterface) => {
+    await queryInterface.bulkDelete('Cards', null, {});
+  }
 };

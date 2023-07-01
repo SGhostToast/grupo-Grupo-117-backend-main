@@ -4,6 +4,8 @@ const router = new Router();
 
 router.post("tables.create", "/create", async(ctx) => {
   try {
+    console.log(ctx.request.body);
+    console.log(ctx.request.body.username);
     if (ctx.request.body.username) {
       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username}});
       if (user) {

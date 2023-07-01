@@ -337,25 +337,31 @@ router.get("players.show", "/meingame/:userid", async(ctx) => {
 async function createGameMaze(ctx, gameid, players) {
   const cards = await ctx.orm.Card.findAll();
   let maze = [];
+  console.log("Cards", cards);
   for (const card of cards) {
+    console.log("In the for for card ", card);
     const mazedata = {
       gameid: gameid,
       cardid: card.id,
     };
     if (card.symbol != '0') {
+      console.log("card.symbol != '0'");
       const mazecarddouble = await ctx.orm.Maze.create(mazedata);
+      console.log("mazecarddouble created");
       maze.push(mazecarddouble);
     }
+    console.log("card.symbol ===== '0'");
     const mazecard = await ctx.orm.Maze.create(mazedata);
+    console.log("mazecard created");
     maze.push(mazecard);
   }
-
   let shuffled_maze = [];
   while (maze.length > 0) {
     const i = Math.floor(Math.random() * (maze.length - 1));
     shuffled_maze.push(maze.splice(i, 1)[0]);
   }
 
+  console.log("Shuffled maze created");
   for (const player of players) {
     for (let i = 0; i <= 6; i++) {
       const put_card = shuffled_maze.pop()
@@ -364,6 +370,7 @@ async function createGameMaze(ctx, gameid, players) {
       put_card.save()
     }
   }
+  console.log("First holder id use");
   let top_card_id;
   for (let i = 0; i < shuffled_maze.length; i++) {
     if (i == (shuffled_maze.length - 1)) {
