@@ -6,16 +6,16 @@ const router = new Router();
 router.post("game.takecard", "/take", async(ctx) => {
   try {
     if (ctx.request.body.playerid) {
-      const player = await ctx.orm.Player.findOne({where:{id:ctx.params.playerid}});
+      const player = await ctx.orm.Player.findOne({where:{id:ctx.request.body.playerid}});
       if (player) {
         if (player.status != 'PLAYING') {
-          throw Error(`El juego del perfil de jugador de id ${ctx.params.playerid} no está en curso.`);
+          throw Error(`El juego del perfil de jugador de id ${ctx.request.body.playerid} no está en curso.`);
         }
         const table = await ctx.orm.Table.findOne({where:{id:player.gameid, turn:player.insideid}});
         if (!table) {
           throw Error(`Solo puedes sacar cartas del maso común cuando sea tu turno.`);
         }
-        const grab_card = drawCard(ctx, player);
+        const grab_card = await drawCard(ctx, player);
         const card = await ctx.orm.Card.findOne({where:{id:grab_card.cardid}});
         const all_players = await ctx.orm.Player.findAll({where:{gameid:player.gameid}});
         finishTurn(ctx, player, table, all_players, null, null);
@@ -27,7 +27,7 @@ router.post("game.takecard", "/take", async(ctx) => {
         ctx.status = 201;
       }
       else {
-        throw Error(`No se ha encontrado un jugador con id ${ctx.params.playerid}`);
+        throw Error(`No se ha encontrado un jugador con id ${ctx.request.body.playerid}`);
       }
     }
     else {
@@ -41,7 +41,8 @@ router.post("game.takecard", "/take", async(ctx) => {
 
 router.post("game.playcard", "/play", async(ctx) => {
   try {
-    if (ctx.request.body.playerid && (ctx.request.body.cardorder + 1)) {
+    console.log("Playing card ", ctx.request.body.cardid);
+    if (ctx.request.body.playerid && ctx.request.body.cardid) {
       const player = await ctx.orm.Player.findOne({where:{id:ctx.request.body.playerid}});
       
       if (player) {
@@ -52,32 +53,24 @@ router.post("game.playcard", "/play", async(ctx) => {
         if (!table) {
           throw Error(`Solo puedes hacer una jugada cuando sea tu turno.`);
         }
-        const play_card = await ctx.orm.Maze.findOne({where: {gameid:player.gameid, holderid:player.insideid, order:ctx.request.body.cardorder}});
-        if (!play_card) {
-          throw Error(`El orden ${ctx.request.body.cardorder} está fuera del rango de tu mano.`);
-        }
-        console.log("Finding top_card");
-        const top_card = await ctx.orm.Maze.findOne({
-          where: {gameid:ctx.request.body.tableid, holderid:1}, // holderid = 1 => Put down maze.
-          order: [['order', 'DESC']],
-        });
+        const play_card = await ctx.orm.Card.findOne({where: {id:ctx.request.body.cardid}});
+        console.log("Play card: ", play_card);
 
         // Hand of the player
-        const hand_to_play = await ctx.orm.Maze.findAll({
-          where: {gameid:player.gameid, holderid:player.insideid},
-          order: [['order', 'DESC']],
-        });
-        // Card id the player choose
-        const card_id_to_play = hand_to_play[ctx.request.body.cardorder].dataValues.cardid;
-        console.log("Card id ", card_id_to_play)
-        // Card the player choose to play
-        const card_type =  await ctx.orm.Card.findOne({where: {id:card_id_to_play}});
-        console.log("Card to play", card_type.dataValues);
+        // const hand_to_play = await ctx.orm.Maze.findAll({
+        //   where: {gameid:player.gameid, holderid:player.insideid},
+        // });
 
-        console.log("top_card found");
+        // Card the player choose to play
+        const card_type =  await ctx.orm.Card.findOne({where: {id:ctx.request.body.cardid}});
+
+        // top card
+        const top_card = await ctx.orm.Maze.findOne({
+          where: {gameid:ctx.request.body.tableid, holderid:1}, // holderid = 1 => Put down maze.
+        });
         const top_card_type = await ctx.orm.Card.findOne({where: {id:top_card.cardid}});
-        console.log("top_card_type found");
         let wild = false;
+
         if (card_type.symbol == 'wild' || card_type.symbol == 'wildDraw4') {
           wild = true;
         }
@@ -92,7 +85,7 @@ router.post("game.playcard", "/play", async(ctx) => {
           //   throw Error(`No puedes jugar tu carta de orden ${ctx.request.body.cardorder} en tu mano ya que esta tiene el símbolo 
           //               ${card_type.symbol} y la carta jugada anteriormente tiene el símbolo ${top_card_type.symbol}`);
           // }
-          throw Error(`No puedes jugar tu carta de orden ${ctx.request.body.cardorder} en tu mano ya que esta es
+          throw Error(`No puedes jugar la carta ${ctx.request.body.cardid} en tu mano ya que esta es
                        (${card_type.color}, ${card_type.symbol}) y el permitido es (${table.color}, ${table.symbol})`);
         }
         const all_players = await ctx.orm.Player.findAll({where:{gameid: player.gameid}});
@@ -101,22 +94,22 @@ router.post("game.playcard", "/play", async(ctx) => {
           if (!ctx.request.body.color) {
             throw Error('Se necesita el color al que quieras cambiar como "color" al jugar una carta "wild" o "wildDraw4".')
           }
-          play_type = await playCard(ctx, player, table, all_players, ctx.request.body.cardorder, card_type, ctx.request.body.color);
+          play_type = await playCard(ctx, player, table, all_players, ctx.request.body.cardid, card_type, ctx.request.body.color);
         }
         else {
-          play_type = await playCard(ctx, player, table, all_players, ctx.request.body.cardorder, card_type, null);
+          play_type = await playCard(ctx, player, table, all_players, ctx.request.body.cardid, card_type, null);
         }
         let body;
         if (play_type == 'standard') {
           body = {
-          msg: `Has jugado la carta de orden ${ctx.request.body.cardorder} en tu mano.`,
+          msg: `Has jugado la carta n° ${ctx.request.body.cardid}.`,
           card: play_card,
           description: card_type
           };
         }
         else {
           body = {
-          msg: `¡Has jugado la carta de orden ${ctx.request.body.cardorder} en tu mano y has ganado el juego! Felicitaciónes.`,
+          msg: `¡Has jugado la carta n° ${ctx.request.body.cardid} y has ganado el juego! Felicitaciónes.`,
           card: play_card,
           description: card_type,
           table: table
@@ -269,27 +262,47 @@ router.get("game.lookathand", "/hand/:playerid", async(ctx) => {
   }
 })
 
-async function playCard(ctx, player, table, all_players, cardorder, card_type, color) {
+async function playCard(ctx, player, table, all_players, cardid_toplay, card_type, color) {
   const hand = await ctx.orm.Maze.findAll({
-    where: {gameid:player.gameid, holderid:player.insideid},
-    order: [['order', 'DESC']],
-  });
-  const top_on_desk = await ctx.orm.Maze.findOne({
-    where: {gameid:player.gameid, holderid:0},
-    order: [['order', 'DESC']],
-  });
+    where: {gameid:player.gameid, holderid:player.insideid}  });
+  // const top_on_desk = await ctx.orm.Maze.findOne({
+  //   where: {gameid:player.gameid, holderid:0},
+  //   order: [['order', 'DESC']],
+  // });
 
-  // console.log("Hand", hand);
+  let cardorder = - 1;
+  for(let i =0; i<hand.length; i++){
+    console.log(hand[i].dataValues.cardid);
+    if(hand[i].dataValues.cardid == cardid_toplay){
+      cardorder = i;
+    }
+  }
+  console.log("Cardorder : ", cardorder);
 
   // Take out card, put it on game
-  const playable_maze = hand.splice(cardorder, 1);
-  const playable_cardid = playable_maze[0].dataValues.cardid;
-  console.log("Playable card id : ", playable_cardid);
+  const playable_maze = hand.splice(cardorder, 1)[0];
+  // const maze_id = playable_maze[0].dataValues.id;
 
-  const playable_card = await ctx.orm.Card.findOne({where:{id:playable_cardid}});
+  // console.log("Playable maze : ", maze_id);
+  // const played_maze = await ctx.orm.Maze.findOne({where:{id:maze_id}});
+
+  // console.log("Played maze", played_maze[0].dataValues);
+  console.log("Played maze before", playable_maze.dataValues);
+  playable_maze.dataValues.holderid = 0;
+  console.log("Played maze after", playable_maze.dataValues);
+  playable_maze.save();
+
+  const cur_maze = await ctx.orm.Maze.findOne({
+    where: {id:playable_maze.dataValues.id}  });
+  console.log("Cur maze", cur_maze.dataValues);
+  cur_maze.holderid = 0;
+  cur_maze.save();
+
+  // saving card
+  const playable_card = await ctx.orm.Card.findOne({where:{id:cardid_toplay}});
 
   playable_card.holderid = 0;
-  playable_card.order = (top_on_desk.order + 1);
+  // playable_card.order = (top_on_desk.order + 1);
   playable_card.save();
 
   // Reorder hand without old card
@@ -297,7 +310,7 @@ async function playCard(ctx, player, table, all_players, cardorder, card_type, c
     hand[i].order = i;
     hand[i].save();
   }
-  hand.save();
+  // hand.save();
 
   table.color = card_type.color;
   table.save();
@@ -390,22 +403,23 @@ async function reverse(table) {
 }
 
 async function getNext(table, player_aux_turn, all_players) {
-  if (table.clockwise) {
-    if (player_aux_turn == (all_players.length + 1)){ // change : length = max_index + 1
-      return 2;
-    }
-    else {
-      return (player_aux_turn + 1);
-    }
-  }
-  else {
-    if (player_aux_turn == 2){
-      return (all_players.length + 1);
-    }
-    else {
-      return (player_aux_turn - 1);
-    }
-  }
+  // if (table.clockwise) {
+  //   if (player_aux_turn == (all_players.length + 1)){ // change : length = max_index + 1
+  //     return 2;
+  //   }
+  //   else {
+  //     return (player_aux_turn + 1);
+  //   }
+  // }
+  // else {
+  //   if (player_aux_turn == 2){
+  //     return (all_players.length + 1);
+  //   }
+  //   else {
+  //     return (player_aux_turn - 1);
+  //   }
+  // }
+  return player_aux_turn;
 }
 
 async function drawCard(ctx, player){
