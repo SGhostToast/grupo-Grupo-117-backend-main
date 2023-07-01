@@ -161,7 +161,7 @@ router.post("game.uno", "/uno", async(ctx) => {
             const cards_on_hand = await ctx.orm.Maze.count({where:{gameid: player.gameid, holderid:other.insideid}});
             if (cards_on_hand == 1) {
               caught.push(other);
-              drawCard(ctx, other);
+              let grab_card = await drawCard(ctx, other);
             }
           }
           if (caught.length == 0) {
@@ -246,7 +246,7 @@ router.get("game.lookathand", "/hand/:playerid", async(ctx) => {
     // Mazes get created when a game starts and get destroyed when it ends, so the abscence of a maze indicates the game is not being played
     const hand = await ctx.orm.Maze.findAll({
       where: {gameid:player.gameid, holderid:player.insideid},
-      order: [['order', 'DESC']],
+      order: [['cardid', 'ASC']],
     });
     if (!hand) {
       throw Error(`El jugador ${ctx.params.playerid} no se encuentra jugando una partida.`);
@@ -370,16 +370,10 @@ async function wildDraw4(ctx, table, player_aux_turn, all_players, color) {
 async function drawTwo(ctx, table, player_aux_turn, all_players) {
   const nextturnid = await getNext(table, player_aux_turn, all_players);
   const nextplayer = await ctx.orm.Player.findOne({where: {gameid:all_players[0].gameid, insideid:nextturnid}});
-  let grab_card = await ctx.orm.Maze.findOne({
-    where: {gameid:all_players[0].gameid, holderid:0}, // holderid = 0 => Pickup maze.
-    order: [['order', 'DESC']],
-  });
-  drawCard(ctx, nextplayer, grab_card);
-  grab_card = await ctx.orm.Maze.findOne({
-    where: {gameid:all_players[0].gameid, holderid:0}, // holderid = 0 => Pickup maze.
-    order: [['order', 'DESC']],
-  });
-  drawCard(ctx, nextplayer, grab_card);
+
+  let grab_card = await drawCard(ctx, nextplayer);
+  let grab_card_bis = await drawCard(ctx, nextplayer);
+  return (grab_card, grab_card_bis);
 }
 
 async function reverse(table) {
@@ -388,23 +382,23 @@ async function reverse(table) {
 }
 
 async function getNext(table, player_aux_turn, all_players) {
-  // if (table.clockwise) {
-  //   if (player_aux_turn == (all_players.length + 1)){ // change : length = max_index + 1
-  //     return 2;
-  //   }
-  //   else {
-  //     return (player_aux_turn + 1);
-  //   }
-  // }
-  // else {
-  //   if (player_aux_turn == 2){
-  //     return (all_players.length + 1);
-  //   }
-  //   else {
-  //     return (player_aux_turn - 1);
-  //   }
-  // }
-  return player_aux_turn;
+  if (table.clockwise) {
+    if (player_aux_turn == (all_players.length + 1)){ // change : length = max_index + 1
+      return 2;
+    }
+    else {
+      return (player_aux_turn + 1);
+    }
+  }
+  else {
+    if (player_aux_turn == 2){
+      return (all_players.length + 1);
+    }
+    else {
+      return (player_aux_turn - 1);
+    }
+  }
+  // return player_aux_turn;
 }
 
 async function drawCard(ctx, player){
@@ -412,12 +406,8 @@ async function drawCard(ctx, player){
     where: {gameid:player.gameid, holderid:0}, // holderid = 0 => Pickup maze.
     order: [['order', 'DESC']],
   });
-  const top_hand_card = await ctx.orm.Maze.findOne({
-    where: {gameid:player.gameid, holderid:player.insideid},
-    order: [['order', 'DESC']],
-  });
+
   grab_card.holderid = player.insideid;
-  grab_card.order = (top_hand_card.order + 1);
   grab_card.save();
   return grab_card;
 }
