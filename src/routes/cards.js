@@ -13,7 +13,6 @@ router.get("cards", "/", async(ctx) => {
       }
 })
 
-
 router.get("cards.show", "/:cardid", async(ctx) => {
     try {
       const card = await ctx.orm.Card.findOne({where:{id:ctx.params.cardid}});

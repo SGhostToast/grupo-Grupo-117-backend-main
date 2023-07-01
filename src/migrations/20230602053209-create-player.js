@@ -35,6 +35,10 @@ module.exports = {
         allowNull: false,
         defaultValue: 'PENDING'
       },
+      uno: {
+        type: Sequelize.ENUM('NO', 'VULNERABLE', 'SAFE'),
+        defaultValue: 'NO'
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
