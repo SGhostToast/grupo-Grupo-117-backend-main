@@ -265,10 +265,6 @@ router.get("game.lookathand", "/hand/:playerid", async(ctx) => {
 async function playCard(ctx, player, table, all_players, cardid_toplay, card_type, color) {
   const hand = await ctx.orm.Maze.findAll({
     where: {gameid:player.gameid, holderid:player.insideid}  });
-  // const top_on_desk = await ctx.orm.Maze.findOne({
-  //   where: {gameid:player.gameid, holderid:0},
-  //   order: [['order', 'DESC']],
-  // });
 
   let cardorder = - 1;
   for(let i =0; i<hand.length; i++){
@@ -279,31 +275,20 @@ async function playCard(ctx, player, table, all_players, cardid_toplay, card_typ
   }
   console.log("Cardorder : ", cardorder);
 
+  // throwing the card which was visible
+  const top_card = await ctx.orm.Maze.findOne({
+    where: {gameid:ctx.request.body.tableid, holderid:1}, // holderid = 1 => Put down maze.
+  });
+  top_card.holderid = 0; // goes back in the bin
+  top_card.save();
+  
   // Take out card, put it on game
   const playable_maze = hand.splice(cardorder, 1)[0];
-  // const maze_id = playable_maze[0].dataValues.id;
-
-  // console.log("Playable maze : ", maze_id);
-  // const played_maze = await ctx.orm.Maze.findOne({where:{id:maze_id}});
-
-  // console.log("Played maze", played_maze[0].dataValues);
-  console.log("Played maze before", playable_maze.dataValues);
-  playable_maze.dataValues.holderid = 0;
-  console.log("Played maze after", playable_maze.dataValues);
-  playable_maze.save();
 
   const cur_maze = await ctx.orm.Maze.findOne({
     where: {id:playable_maze.dataValues.id}  });
-  console.log("Cur maze", cur_maze.dataValues);
-  cur_maze.holderid = 0;
+  cur_maze.holderid = 1;
   cur_maze.save();
-
-  // saving card
-  const playable_card = await ctx.orm.Card.findOne({where:{id:cardid_toplay}});
-
-  playable_card.holderid = 0;
-  // playable_card.order = (top_on_desk.order + 1);
-  playable_card.save();
 
   // Reorder hand without old card
   for (let i = 0; i < hand.length; i++) {
