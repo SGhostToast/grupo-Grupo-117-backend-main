@@ -43,6 +43,7 @@ router.post("game.playcard", "/play", async(ctx) => {
   try {
     if (ctx.request.body.playerid && (ctx.request.body.cardorder + 1)) {
       const player = await ctx.orm.Player.findOne({where:{id:ctx.request.body.playerid}});
+      
       if (player) {
         if (player.status != 'PLAYING') {
           throw Error(`El juego del perfil de jugador de id ${ctx.request.body.playerid} no está en curso.`);
@@ -60,11 +61,22 @@ router.post("game.playcard", "/play", async(ctx) => {
           where: {gameid:ctx.request.body.tableid, holderid:1}, // holderid = 1 => Put down maze.
           order: [['order', 'DESC']],
         });
+
+        // Hand of the player
+        const hand_to_play = await ctx.orm.Maze.findAll({
+          where: {gameid:player.gameid, holderid:player.insideid},
+          order: [['order', 'DESC']],
+        });
+        // Card id the player choose
+        const card_id_to_play = hand_to_play[ctx.request.body.cardorder].dataValues.cardid;
+        console.log("Card id ", card_id_to_play)
+        // Card the player choose to play
+        const card_type =  await ctx.orm.Card.findOne({where: {id:card_id_to_play}});
+        console.log("Card to play", card_type.dataValues);
+
         console.log("top_card found");
         const top_card_type = await ctx.orm.Card.findOne({where: {id:top_card.cardid}});
         console.log("top_card_type found");
-        const card_type = await ctx.orm.Card.findOne({where: {id:play_card.cardid}});
-        console.log("card_type found");
         let wild = false;
         if (card_type.symbol == 'wild' || card_type.symbol == 'wildDraw4') {
           wild = true;
@@ -72,14 +84,16 @@ router.post("game.playcard", "/play", async(ctx) => {
         // The table color can only be 'MULTI' if the very first card in the discard maze (at the beginning of the game) is a wild card.
         // Only in this case can the player play whatever color they want. This is a border case.
         else if (card_type.symbol != top_card_type.symbol && card_type.color != table.color && table.color != 'MULTI') {
-          if (card_type.color != table.color) {
-            throw Error(`No puedes jugar tu carta de orden ${ctx.request.body.cardorder} en tu mano ya que esta es de color 
-                        ${card_type.color} y el color permitido es ${table.color}`);
-          }
-          else {
-            throw Error(`No puedes jugar tu carta de orden ${ctx.request.body.cardorder} en tu mano ya que esta tiene el símbolo 
-                        ${card_type.symbol} y la carta jugada anteriormente tiene el símbolo ${top_card_type.symbol}`);
-          }
+          // if (card_type.color != table.color) {
+          //   throw Error(`No puedes jugar tu carta de orden ${ctx.request.body.cardorder} en tu mano ya que esta es de color 
+          //               ${card_type.color} y el color permitido es ${table.color}`);
+          // }
+          // else {
+          //   throw Error(`No puedes jugar tu carta de orden ${ctx.request.body.cardorder} en tu mano ya que esta tiene el símbolo 
+          //               ${card_type.symbol} y la carta jugada anteriormente tiene el símbolo ${top_card_type.symbol}`);
+          // }
+          throw Error(`No puedes jugar tu carta de orden ${ctx.request.body.cardorder} en tu mano ya que esta es
+                       (${card_type.color}, ${card_type.symbol}) y el permitido es (${table.color}, ${table.symbol})`);
         }
         const all_players = await ctx.orm.Player.findAll({where:{gameid: player.gameid}});
         let play_type;
