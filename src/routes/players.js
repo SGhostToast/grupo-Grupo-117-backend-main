@@ -25,7 +25,7 @@ router.post("players.create", "/invite", async(ctx) => {
         }
         else {
           const friend = await ctx.orm.Friend.findOne({
-            where: {
+            where:{
               [Op.or]: [
                 {frienderid: user.id, status: 'FRENS'},
                 {befriendedid: user.id, status: 'FRENS'}
