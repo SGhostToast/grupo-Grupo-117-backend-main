@@ -1,5 +1,6 @@
 const Router = require("koa-router");
 const { Op } = require('sequelize');
+var jwt = require('jsonwebtoken');
 
 const router = new Router();
 
@@ -216,7 +217,7 @@ router.get("users.list", "/", async(ctx) => {
   }
 })
 
-router.get("users.show", "/:id", async(ctx) => {
+router.get("users.show", "/show/:id", async(ctx) => {
   try {
     // const user = await ctx.orm.User.findByPk(ctx.params.id);
     const user = await ctx.orm.User.findOne({where:{id:ctx.params.id}});
@@ -226,6 +227,32 @@ router.get("users.show", "/:id", async(ctx) => {
     ctx.body = error;
     ctx.status = 400;
   }
+})
+
+router.get("users.show", "/accesseduser", async(ctx) => {
+  const token = ctx.request.headers.authorization?.replace("Bearer ", "");
+  console.log(token);
+    if (!token) {
+        console.log("no token");
+        ctx.body = { isLoggedIn: false };
+        ctx.status = 401;
+        return;
+    }
+
+    try {
+      const JWT_PRIVATE_KEY = process.env.JWT_SECRET;
+      const decodedToken = jwt.verify(token, JWT_PRIVATE_KEY);
+      console.log(`User is ${decodedToken.sub}`);
+      
+      const userid = decodedToken.sub;
+      const user = await ctx.orm.User.findOne({where:{id:userid}});
+      ctx.body = user;
+      ctx.status = 200;
+    } catch(error) {
+      console.error(error);
+      ctx.body = error;
+      ctx.status = 400;
+      }
 })
 
 module.exports = router;

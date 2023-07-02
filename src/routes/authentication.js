@@ -95,6 +95,7 @@ router.get("authentication.checkLogin", "/check-login", async (ctx) => {
     try {
         const JWT_PRIVATE_KEY = process.env.JWT_SECRET;
         const decodedToken = jwt.verify(token, JWT_PRIVATE_KEY);
+        console.log(`User is ${decodedToken.sub}`);
 
         ctx.body = { isLoggedIn: true };
         ctx.status = 200;
