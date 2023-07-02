@@ -14,6 +14,10 @@ const router = new Router();
 
 router.use('/auth', auth.routes());
 router.use('/cards', cards.routes());
+// router.use('/users', users.routes());
+// router.use('/tables', tables.routes());
+// router.use('/players', players.routes());
+// router.use('/ingame', ingame.routes());
 
 // Desde esta línea, todas las rutas requieriran un JWT. Esto no aplica para
 // las líneas anteriores

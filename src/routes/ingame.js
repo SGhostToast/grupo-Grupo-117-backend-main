@@ -6,10 +6,10 @@ const router = new Router();
 router.post("game.takecard", "/take", async(ctx) => {
   try {
     if (ctx.request.body.playerid) {
-      const player = await ctx.orm.Player.findOne({where:{id:ctx.params.playerid}});
+      const player = await ctx.orm.Player.findOne({where:{id:ctx.request.body.playerid}});
       if (player) {
         if (player.status != 'PLAYING') {
-          throw Error(`El juego del perfil de jugador de id ${ctx.params.playerid} no está en curso.`);
+          throw Error(`El juego del perfil de jugador de id ${ctx.request.body.playerid} no está en curso.`);
         }
         const table = await ctx.orm.Table.findOne({where:{id:player.gameid, turn:player.insideid}});
         if (!table) {
@@ -27,7 +27,7 @@ router.post("game.takecard", "/take", async(ctx) => {
         ctx.status = 201;
       }
       else {
-        throw Error(`No se ha encontrado un jugador con id ${ctx.params.playerid}`);
+        throw Error(`No se ha encontrado un jugador con id ${ctx.request.body.playerid}`);
       }
     }
     else {
@@ -42,10 +42,10 @@ router.post("game.takecard", "/take", async(ctx) => {
 router.post("game.playcard", "/play", async(ctx) => {
   try {
     if (ctx.request.body.playerid && ctx.request.body.cardorder) {
-      const player = await ctx.orm.Player.findOne({where:{id:ctx.params.playerid}});
+      const player = await ctx.orm.Player.findOne({where:{id:ctx.request.body.playerid}});
       if (player) {
         if (player.status != 'PLAYING') {
-          throw Error(`El juego del perfil de jugador de id ${ctx.params.playerid} no está en curso.`);
+          throw Error(`El juego del perfil de jugador de id ${ctx.request.body.playerid} no está en curso.`);
         }
         const table = await ctx.orm.Table.findOne({where:{id:player.gameid, turn:player.insideid}});
         if (!table) {
@@ -56,19 +56,19 @@ router.post("game.playcard", "/play", async(ctx) => {
           throw Error(`El orden ${ctx.request.body.cardorder} está fuera del rango de tu mano.`);
         }
         const top_card = await ctx.orm.Maze.findOne({
-          where: {gameid:ctx.params.tableid, holderid:1}, // holderid = 1 => Put down maze.
+          where: {gameid:ctx.request.body.tableid, holderid:1}, // holderid = 1 => Put down maze.
           order: [['order', 'DESC']],
         });
-        const top_card_type = await ctx.orm.card.findOne({where: {id:top_card.cardid}});
-        const card_type = await ctx.orm.card.findOne({where: {id:play_card.cardid}});
+        const top_card_type = await ctx.orm.Card.findOne({where: {id:top_card.cardid}});
+        const play_card_type = await ctx.orm.Card.findOne({where: {id:play_card.cardid}});
         let wild = false;
-        if (card_type.symbol == 'wild' || card_type.symbol == 'wildDraw4') {
+        if (play_card_type.symbol == 'wild' || play_card_type.symbol == 'wildDraw4') {
           wild = true;
         }
         // The table color can only be 'MULTI' if the very first card in the discard maze (at the beginning of the game) is a wild card.
         // Only in this case can the player play whatever color they want. This is a border case.
-        else if (card_type.symbol != top_card_type.symbol && card_type.color != table.color && table.color != 'MULTI') {
-          if (card_type.color != table.color) {
+        else if (play_card_type.symbol != top_card_type.symbol && play_card_type.color != table.color && table.color != 'MULTI') {
+          if (play_card_type.color != table.color) {
             throw Error(`No puedes jugar tu carta de orden ${ctx.request.body.cardorder} en tu mano ya que esta es de color 
                         ${card_type.color} y el color permitido es ${table.color}`);
           }
@@ -108,7 +108,7 @@ router.post("game.playcard", "/play", async(ctx) => {
         ctx.status = 201;
       }
       else {
-        throw Error(`No se ha encontrado un jugador con id ${ctx.params.playerid}`);
+        throw Error(`No se ha encontrado un jugador con id ${ctx.request.body.playerid}`);
       }
     }
     else {
@@ -129,10 +129,10 @@ router.post("game.uno", "/uno", async(ctx) => {
   // If the UNO button is rightfully called on one or more players, and they were not safe, they must draw a card as a penalty.
   try {
     if (ctx.request.body.playerid) {
-      const player = await ctx.orm.Player.findOne({where:{id:ctx.params.playerid}});
+      const player = await ctx.orm.Player.findOne({where:{id:ctx.request.body.playerid}});
       if (player) {
         if (player.status != 'PLAYING') {
-          throw Error(`El juego del perfil de jugador de id ${ctx.params.playerid} no está en curso.`);
+          throw Error(`El juego del perfil de jugador de id ${ctx.request.body.playerid} no está en curso.`);
         }
         var body;
         if (player.uno == 'VULNERABLE') {
@@ -173,7 +173,7 @@ router.post("game.uno", "/uno", async(ctx) => {
         ctx.status = 201;
       }
       else {
-        throw Error(`No se ha encontrado un jugador con id ${ctx.params.playerid}.`);
+        throw Error(`No se ha encontrado un jugador con id ${ctx.request.body.playerid}.`);
       }
     }
     else {
@@ -235,7 +235,7 @@ router.get("game.lookathand", "/hand/:playerid", async(ctx) => {
     // Mazes get created when a game starts and get destroyed when it ends, so the abscence of a maze indicates the game is not being played
     const hand = await ctx.orm.Maze.findAll({
       where: {gameid:player.gameid, holderid:player.insideid},
-      order: [['order', 'DESC']],
+      order: [['order', 'ASC']],
     });
     if (!hand) {
       throw Error(`El jugador ${ctx.params.playerid} no se encuentra jugando una partida.`);
@@ -254,7 +254,7 @@ router.get("game.lookathand", "/hand/:playerid", async(ctx) => {
 async function playCard(ctx, player, table, all_players, cardorder, card_type, color) {
   const hand = await ctx.orm.Maze.findAll({
     where: {gameid:player.gameid, holderid:player.insideid},
-    order: [['order', 'DESC']],
+    order: [['order', 'ASC']],
   });
   const top_on_desk = await ctx.orm.Maze.findOne({
     where: {gameid:player.gameid, holderid:0},
@@ -318,6 +318,9 @@ return 'standard';
 
 async function finishGame(ctx, player, all_players) {
   player.status = 'WINNER';
+  const user = await ctx.orm.User.findByPk(player.userid);
+  user.status = 'ONLINE';
+  await user.save();
   player.save();
   for (const loser of all_players) {
     if (loser.id == player.id) {
@@ -325,6 +328,9 @@ async function finishGame(ctx, player, all_players) {
     }
     loser.status = 'LOSER';
     loser.save();
+    const other = await ctx.orm.User.findByPk(loser.userid);
+    other.status = 'ONLINE';
+    await other.save();
   }
 
   await ctx.orm.Maze.destroy({where:{gameid: player.gameid}});
@@ -346,16 +352,8 @@ async function wildDraw4(ctx, table, player_aux_turn, all_players, color) {
 async function drawTwo(ctx, table, player_aux_turn, all_players) {
   const nextturnid = await getNext(table, player_aux_turn, all_players);
   const nextplayer = await ctx.orm.Player.findOne({where: {gameid:all_players[0].gameid, insideid:nextturnid}});
-  let grab_card = await ctx.orm.Maze.findOne({
-    where: {gameid:all_players[0].gameid, holderid:0}, // holderid = 0 => Pickup maze.
-    order: [['order', 'DESC']],
-  });
-  drawCard(ctx, nextplayer, grab_card);
-  grab_card = await ctx.orm.Maze.findOne({
-    where: {gameid:all_players[0].gameid, holderid:0}, // holderid = 0 => Pickup maze.
-    order: [['order', 'DESC']],
-  });
-  drawCard(ctx, nextplayer, grab_card);
+  drawCard(ctx, nextplayer);
+  drawCard(ctx, nextplayer);
 }
 
 async function reverse(table) {

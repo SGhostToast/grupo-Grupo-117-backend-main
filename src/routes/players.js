@@ -23,6 +23,9 @@ router.post("players.create", "/invite", async(ctx) => {
         if (!other) {
           throw Error(`No se encontró el usuario con username ${ctx.request.body.otherusername}.`)
         }
+        else if (other.status == "OFFLINE") {
+          throw Error(`El usuario ${ctx.request.body.otherusername} se encuentra OFFLINE.`)
+        }
         else {
           const friend = await ctx.orm.Friend.findOne({
             where:{
@@ -250,6 +253,9 @@ router.post("players.begin", "/begin", async(ctx) => {
               plyer.status = 'PLAYING';
               plyer.insideid = i;
               await plyer.save();
+              const user = await ctx.orm.User.findByPk(plyer.userid);
+              user.status = 'PLAYING';
+              await user.save();
               i++;
             }
             const top_card_id = await createGameMaze(ctx, game.id, shuffled_players);

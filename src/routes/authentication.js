@@ -9,7 +9,7 @@ const router = new Router();
 
 router.post("authentication.signup", "/signup", async (ctx) => {
     const authInfo = ctx.request.body;
-    let user = await ctx.orm.User.findOne({ where: { mail: authInfo.email } })
+    let user = await ctx.orm.User.findOne({ where: { mail: authInfo.mail } })
     if (user) {
         ctx.body = `The user by the email '${authInfo.email}' already exists`;
         ctx.status = 400;
@@ -50,7 +50,7 @@ router.post("authentication.login", "/login", async (ctx) => {
         return;
     }
     if (!user) {
-        ctx.body = `The user by the email '${authInfo.email}' was not found`;
+        ctx.body = `The user by the email '${authInfo.mail}' was not found`;
         ctx.status = 400;
         return;
     }
@@ -67,12 +67,14 @@ router.post("authentication.login", "/login", async (ctx) => {
             { subject: user.id.toString() },
             { expiresIn: expirationSeconds }
         );
+        user.status = "ONLINE";
+        user.save();
         ctx.body = {
             username: user.username,
             email: user.mail,
-            "access_token": token,
-            "token_type": "Bearer",
-            "expires_in": expirationSeconds,
+            access_token: token,
+            token_type: "Bearer",
+            expires_in: expirationSeconds,
         }
         ctx.status = 200;
     } else {
@@ -81,5 +83,27 @@ router.post("authentication.login", "/login", async (ctx) => {
         return;
     }
 })
+
+router.get("authentication.checkLogin", "/check-login", async (ctx) => {
+    const token = ctx.request.headers.authorization?.replace("Bearer ", "");
+    if (!token) {
+        ctx.body = { isLoggedIn: false };
+        ctx.status = 401;
+        return;
+    }
+
+    try {
+        const JWT_PRIVATE_KEY = process.env.JWT_SECRET;
+        const decodedToken = jwt.verify(token, JWT_PRIVATE_KEY);
+
+        ctx.body = { isLoggedIn: true };
+        ctx.status = 200;
+    }
+    catch (error) {
+        ctx.body = { isLoggedIn: false };
+        ctx.status = 401;
+    }
+});
+  
 
 module.exports = router;
