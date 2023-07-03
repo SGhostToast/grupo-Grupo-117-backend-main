@@ -253,6 +253,16 @@ router.get("users.show", "/accesseduser", async(ctx) => {
       ctx.body = error;
       ctx.status = 400;
       }
+
+router.get("users.showtable", "/table/:id", async(ctx) => {
+  try {
+    const players_list = await ctx.orm.Player.findAll({where:{userid:ctx.params.id, status:"READY"}});
+    ctx.body = players_list;
+    ctx.status = 200;
+  } catch(error) {
+    ctx.body = error;
+    ctx.status = 400;
+  }
 })
 
 module.exports = router;

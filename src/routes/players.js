@@ -19,8 +19,8 @@ router.post("players.create", "/invite", async(ctx) => {
             throw Error(`No eres parte de ninguna partida. Por favor, crea tu propia partida primero.`)
           }
         }
-        const other = await ctx.orm.User.findOne({where:{username:ctx.request.body.otherusername}});
-        if (!other) {
+        const other_user = await ctx.orm.User.findOne({where:{username:ctx.request.body.otherusername}});
+        if (!other_user) {
           throw Error(`No se encontró el usuario con username ${ctx.request.body.otherusername}.`)
         }
         else if (other.status == "OFFLINE") {
@@ -38,32 +38,31 @@ router.post("players.create", "/invite", async(ctx) => {
           if (!friend) {
             throw Error(`No eres amigx de ${ctx.request.body.otherusername}. ¡Puedes enviarle una solicitud de amistad para jugar juntos!`)
           }
-          let otherplayer = await ctx.orm.Player.findOne({
-            where: {
-              [Op.and]: [
-                {userid:other.id},
-                {
-                  [Op.or]: [
-                    {status: 'READY'},
-                    {status: 'PLAYING'},
-                  ]
-                }
-              ]
+          let other_playing_player = await ctx.orm.Player.findOne({where:{userid:other_user.id, status: 'PLAYING'}});
+          let other_ready_player = await ctx.orm.Player.findOne({where:{userid:other_user.id, status: 'READY'}});
+          
+          if (other_playing_player) {
+            throw Error(`El usuario con username ${ctx.request.body.otherusername} ya se encuentra jugando en otra partida ${other_playing_player.gameid}.`)
+          } else if (other_ready_player) {
+            throw Error(`El usuario con username ${ctx.request.body.otherusername} ya se encuentra esperando en otra partida ${other_ready_player.gameid}.`)
+          } else {
+
+            let already_invited_player = await ctx.orm.Player.findOne({where:{userid:other_user.id, status: 'PENDING', gameid:player.gameid}});
+            if (already_invited_player) {
+              throw Error(`Ya has invitado ${ctx.request.body.otherusername} en la partida ${player.gameid}.`)
+            } else {
+              const playerdata = {
+                userid: other_user.id,
+                gameid: player.gameid
+              };
+              const otherplayer = await ctx.orm.Player.create(playerdata);
+              ctx.body = {
+                msg: `¡Has invitado a ${ctx.request.body.otherusername} a jugar en tu partida!`,
+                new_player: otherplayer
+              };
+              ctx.status = 201;
             }
-          });          
-          if (otherplayer) {
-            throw Error(`El usuario con username ${ctx.request.body.otherusername} ya se encuentra en otra partida.`)
           }
-          const playerdata = {
-            userid: other.id,
-            gameid: player.gameid
-          };
-          otherplayer = await ctx.orm.Player.create(playerdata);
-          ctx.body = {
-            msg: `¡Has invitado a ${ctx.request.body.otherusername} a jugar en tu partida!`,
-            new_player: otherplayer
-          };
-          ctx.status = 201;
         }
       }
       else {
@@ -87,22 +86,19 @@ router.post("players.showinvitations", "/invitations", async(ctx) => {
       const user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username}});
       if (user) {
         const insidegame = await ctx.orm.Player.findOne({where:{userid:user.id, status: 'READY'}});
+        const dico = {};
         if (insidegame) {
           const invited_to_your_game = await ctx.orm.Player.findAll({where:{gameid:insidegame.gameid, status: 'PENDING'}});
-          ctx.body = {
-            msg: `Amistades invitadas a tu juego actual:`,
-            invited_to_your_game: invited_to_your_game
-          };
-          ctx.status = 201;
+          dico['msg_you_invited'] = `Amistades invitadas a tu juego actual:`;
+          dico['invited_to_your_game'] = invited_to_your_game;
         }
-        else {
-          const you_were_invited_to = await ctx.orm.Player.findAll({where:{userid:user.id, status: 'PENDING'}});
-          ctx.body = {
-            msg: `Te invitaron a los siguientes juegos:`,
-            you_were_invited_to: you_were_invited_to
-          };
-          ctx.status = 201;
-        }
+
+        const you_were_invited_to = await ctx.orm.Player.findAll({where:{userid:user.id, status: 'PENDING'}});
+        dico['msg_you_were_invited'] = `Te invitaron a los siguientes juegos:`;
+        dico['you_were_invited_to'] = you_were_invited_to;
+        ctx.status = 201;
+
+        ctx.body = dico;
       }
       else {
         throw Error(`No se encontró tu usuario con username ${ctx.request.body.username}.`)
@@ -308,6 +304,24 @@ router.get("players.show", "/:id", async(ctx) => {
   }
 })
 
+router.get("players.show", "/mewaitinggame/:userid", async(ctx) => {
+  try {
+    // const user = await ctx.orm.User.findByPk(ctx.params.id);
+    const player = await ctx.orm.Player.findOne({where:{userid:ctx.params.userid, status:'READY'}});
+    if (!player) {
+      throw Error(`Tu usuario de id ${ctx.params.userid} no se encuentra esperando un juego.`);
+    }
+    ctx.body = {
+      msg: `Tu perfil de jugador en el juego que esperas es:`,
+      player: player,
+    };
+    ctx.status = 200;
+  } catch(error) {
+    ctx.body = {errorMessage: error.message, errorCode: error.code};
+    ctx.status = 400;
+  }
+})
+
 router.get("players.show", "/meingame/:userid", async(ctx) => {
   try {
     // const user = await ctx.orm.User.findByPk(ctx.params.id);
@@ -317,7 +331,7 @@ router.get("players.show", "/meingame/:userid", async(ctx) => {
     }
     ctx.body = {
       msg: `Tu perfil de jugador en el juego actual es:`,
-      top_card: player,
+      player: player,
     };
     ctx.status = 200;
   } catch(error) {

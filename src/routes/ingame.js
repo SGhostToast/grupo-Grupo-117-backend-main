@@ -8,6 +8,7 @@ router.post("game.takecard", "/take", async(ctx) => {
     if (ctx.request.body.playerid) {
       const player = await ctx.orm.Player.findOne({where:{id:ctx.request.body.playerid}});
       if (player) {
+
         if (player.status != 'PLAYING') {
           throw Error(`El juego del perfil de jugador de id ${ctx.request.body.playerid} no está en curso.`);
         }
@@ -41,7 +42,7 @@ router.post("game.takecard", "/take", async(ctx) => {
 
 router.post("game.playcard", "/play", async(ctx) => {
   try {
-    if (ctx.request.body.playerid && ctx.request.body.cardorder) {
+    if (ctx.request.body.playerid && (ctx.request.body.cardorder + 1)) {
       const player = await ctx.orm.Player.findOne({where:{id:ctx.request.body.playerid}});
       if (player) {
         if (player.status != 'PLAYING') {
