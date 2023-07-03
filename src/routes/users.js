@@ -1,61 +1,10 @@
 const Router = require("koa-router");
 const { Op } = require('sequelize');
+var jwt = require('jsonwebtoken');
 
 const router = new Router();
 
 // ********** POSTS **********
-
-// ---------- Login & Signup ----------
-
-router.post("users.create", "/signup", async(ctx) => {
-  try {
-    const user = await ctx.orm.User.create(ctx.request.body);
-    ctx.body = user;
-    ctx.status = 201;
-  } catch(error) {
-    ctx.body = error;
-    ctx.status = 400;
-  }
-})
-
-router.post("users.enter", "/login", async(ctx) => {
-  try {
-    let user;
-    if(ctx.request.body.username && ctx.request.body.password) {
-      user = await ctx.orm.User.findOne({where:{username:ctx.request.body.username, password:ctx.request.body.password}});
-    }
-    else if(ctx.request.body.mail && ctx.request.body.password) {
-      user = await ctx.orm.User.findOne({where:{mail:ctx.request.body.mail, password:ctx.request.body.password}});
-    }
-    else {
-      throw Error('Se necesita entregar un "username" o "mail" con su "password" correspondiente.')
-    }
-    if (user && user.status == 'OFFLINE') {
-      user.status = 'ONLINE';
-      await user.save();
-      ctx.body = {
-        msg: 'Login exitoso.',
-        user: user
-      };
-    }
-    else if (user) {
-      ctx.body = {
-        msg: 'Este usuario ya se encuentra ingresado en otra parte.',
-        user: user
-      };
-    }
-    else {
-      ctx.body = {
-        msg: 'Los datos no calzan con un usuario existente, intenta denuevo.',
-        user: user
-      };
-    }
-    ctx.status = 200;
-  } catch(error) {
-    ctx.body = {errorMessage: error.message, errorCode: error.code};
-    ctx.status = 400;
-  }
-})
 
 // ---------- Friends ----------
 
@@ -268,7 +217,7 @@ router.get("users.list", "/", async(ctx) => {
   }
 })
 
-router.get("users.show", "/:id", async(ctx) => {
+router.get("users.show", "/show/:id", async(ctx) => {
   try {
     // const user = await ctx.orm.User.findByPk(ctx.params.id);
     const user = await ctx.orm.User.findOne({where:{id:ctx.params.id}});
@@ -279,6 +228,31 @@ router.get("users.show", "/:id", async(ctx) => {
     ctx.status = 400;
   }
 })
+
+router.get("users.show", "/accesseduser", async(ctx) => {
+  const token = ctx.request.headers.authorization?.replace("Bearer ", "");
+  console.log(token);
+    if (!token) {
+        console.log("no token");
+        ctx.body = { isLoggedIn: false };
+        ctx.status = 401;
+        return;
+    }
+
+    try {
+      const JWT_PRIVATE_KEY = process.env.JWT_SECRET;
+      const decodedToken = jwt.verify(token, JWT_PRIVATE_KEY);
+      console.log(`User is ${decodedToken.sub}`);
+      
+      const userid = decodedToken.sub;
+      const user = await ctx.orm.User.findOne({where:{id:userid}});
+      ctx.body = user;
+      ctx.status = 200;
+    } catch(error) {
+      console.error(error);
+      ctx.body = error;
+      ctx.status = 400;
+      }
 
 router.get("users.showtable", "/table/:id", async(ctx) => {
   try {

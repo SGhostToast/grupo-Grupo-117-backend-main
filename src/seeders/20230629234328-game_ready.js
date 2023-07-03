@@ -17,6 +17,7 @@ module.exports = {
       score: 0,
       insideid: null,
       status: 'READY',
+      uno: 'NO',
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -27,6 +28,7 @@ module.exports = {
       score: 0,
       insideid: null,
       status: 'READY',
+      uno: 'NO',
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -37,6 +39,7 @@ module.exports = {
       score: 0,
       insideid: null,
       status: 'READY',
+      uno: 'NO',
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -47,6 +50,7 @@ module.exports = {
       score: 0,
       insideid: null,
       status: 'READY',
+      uno: 'NO',
       createdAt: new Date(),
       updatedAt: new Date()
     }
